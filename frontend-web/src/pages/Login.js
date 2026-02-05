@@ -22,6 +22,9 @@ const Login = () => {
       const errorMsg = err.response?.data?.error || 'Login failed. Please try again.';
       if (err.response?.status === 404) {
         setError('User not found. Please sign up first!');
+      } else if (err.response?.status === 401) {
+        setError('Incorrect password. Please try again.');
+        setPassword(''); // Clear only password, keep username
       } else {
         setError(errorMsg);
       }

@@ -13,7 +13,7 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 
 | Component | URL | Status |
 |-----------|-----|--------|
-| **Web Frontend** | [https://frontend-c0t6d2cbr-sree-s-projects-a699a381.vercel.app](https://frontend-c0t6d2cbr-sree-s-projects-a699a381.vercel.app) | ✅ Live |
+| **Web Frontend** | [https://frontend-web-nu-blue.vercel.app](https://frontend-web-nu-blue.vercel.app) | ✅ Live |
 | **API Backend** | Run locally (see instructions below) | 📝 Local |
 
 > **Note:** The frontend is deployed on Vercel. To fully test the application, you need to run the backend locally or deploy it to your own server.
@@ -29,7 +29,7 @@ python manage.py migrate
 python manage.py runserver
 
 # 2. Open the live frontend in browser
-# Visit: https://frontend-web-delta-one.vercel.app
+# Visit: https://frontend-web-nu-blue.vercel.app
 # (Configure it to use http://localhost:8000/api)
 ```
 
@@ -217,7 +217,7 @@ cd frontend-web && npm install && npm start
 
 **Option B: Use Live Frontend with Local Backend**
 1. Start backend locally (see above)
-2. Visit: https://frontend-c0t6d2cbr-sree-s-projects-a699a381.vercel.app
+2. Visit: https://frontend-web-nu-blue.vercel.app
 3. The frontend will connect to `localhost:8000` by default
 
 **Test Flow:**

@@ -7,6 +7,34 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 ![React](https://img.shields.io/badge/React-18.2+-61dafb.svg)
 ![PyQt5](https://img.shields.io/badge/PyQt5-5.15+-41cd52.svg)
 
+---
+
+## 🌐 Live Demo
+
+| Component | URL | Status |
+|-----------|-----|--------|
+| **Web Frontend** | [https://frontend-c0t6d2cbr-sree-s-projects-a699a381.vercel.app](https://frontend-c0t6d2cbr-sree-s-projects-a699a381.vercel.app) | ✅ Live |
+| **API Backend** | Run locally (see instructions below) | 📝 Local |
+
+> **Note:** The frontend is deployed on Vercel. To fully test the application, you need to run the backend locally or deploy it to your own server.
+
+### Quick Test (Local Backend + Live Frontend)
+
+```bash
+# 1. Clone and start backend locally
+git clone https://github.com/228w1a12d7/chemical-equipment-visualizer.git
+cd chemical-equipment-visualizer/backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+
+# 2. Open the live frontend in browser
+# Visit: https://frontend-web-delta-one.vercel.app
+# (Configure it to use http://localhost:8000/api)
+```
+
+---
+
 ## 📋 Features
 
 - **CSV Upload**: Upload equipment data files with drag-and-drop support (Web) or file picker (Desktop)
@@ -16,6 +44,8 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 - **PDF Reports**: Generate downloadable PDF reports with summaries and data tables
 - **Authentication**: User registration and login with token-based authentication
 - **Dual Frontend**: Both Web (React) and Desktop (PyQt5) interfaces
+
+---
 
 ## 🏗️ Tech Stack
 
@@ -28,60 +58,9 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 | Database | SQLite | Store uploaded datasets |
 | PDF Generation | ReportLab | Generate PDF reports |
 
-## 📁 Project Structure
+---
 
-```
-chemical-equipment-visualizer/
-├── backend/                    # Django Backend
-│   ├── chemical_visualizer/    # Django project settings
-│   │   ├── settings.py         # Development settings
-│   │   ├── settings_prod.py    # Production settings
-│   │   ├── urls.py             # Main URL configuration
-│   │   └── wsgi.py             # WSGI application
-│   ├── api/                    # REST API app
-│   │   ├── models.py           # Database models
-│   │   ├── views.py            # API views
-│   │   ├── serializers.py      # DRF serializers
-│   │   └── urls.py             # API routes
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend-web/               # React Web Frontend
-│   ├── public/
-│   │   └── index.html
-│   ├── src/
-│   │   ├── components/         # Reusable components
-│   │   │   ├── Charts/         # Chart.js visualizations
-│   │   │   ├── DataTable/      # Data table component
-│   │   │   └── FileUpload/     # CSV upload component
-│   │   ├── context/            # Auth context
-│   │   ├── pages/              # Page components
-│   │   │   ├── Dashboard.js    # Main dashboard
-│   │   │   ├── Login.js        # Login page
-│   │   │   └── Register.js     # Registration page
-│   │   ├── services/           # API service
-│   │   │   └── api.js          # Axios API client
-│   │   └── App.js
-│   ├── package.json
-│   ├── Dockerfile
-│   └── nginx.conf
-├── frontend-desktop/           # PyQt5 Desktop Frontend
-│   ├── main.py                 # Main application
-│   ├── api_service.py          # API client
-│   └── requirements.txt
-├── sample_equipment_data.csv   # Sample data for testing
-├── docker-compose.yml          # Docker deployment
-├── render.yaml                 # Render.com deployment
-├── railway.toml                # Railway deployment
-├── netlify.toml                # Netlify deployment
-├── vercel.json                 # Vercel deployment
-├── deploy.sh                   # Local deployment script
-├── stop.sh                     # Stop services script
-├── build.sh                    # Build script
-└── README.md
-```
-
-## 🚀 Quick Start
+## 🚀 Quick Start (Run Locally)
 
 ### Prerequisites
 
@@ -151,9 +130,18 @@ pip install -r requirements.txt
 python main.py
 ```
 
+---
+
 ## 📊 Sample Data
 
-A sample CSV file (`sample_equipment_data.csv`) is included for testing. The CSV contains 25 equipment records with these columns:
+A sample CSV file (`sample_equipment_data.csv`) is included for testing:
+
+```csv
+Equipment Name,Type,Flowrate,Pressure,Temperature
+Reactor-001,Reactor,150.5,25.3,180.0
+Pump-001,Pump,200.0,45.0,25.0
+HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
+```
 
 | Column | Description | Example |
 |--------|-------------|---------|
@@ -163,13 +151,7 @@ A sample CSV file (`sample_equipment_data.csv`) is included for testing. The CSV
 | Pressure | Pressure value | 25.3 |
 | Temperature | Temperature value | 180.0 |
 
-### Sample Data Preview:
-```csv
-Equipment Name,Type,Flowrate,Pressure,Temperature
-Reactor-001,Reactor,150.5,25.3,180.0
-Pump-001,Pump,200.0,45.0,25.0
-HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
-```
+---
 
 ## 🔌 API Endpoints
 
@@ -177,8 +159,8 @@ HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/auth/register/` | POST | Register new user (requires: username, email, password, password_confirm) |
-| `/api/auth/login/` | POST | Login user (requires: username, password) |
+| `/api/auth/register/` | POST | Register new user |
+| `/api/auth/login/` | POST | Login user |
 | `/api/auth/logout/` | POST | Logout user |
 | `/api/auth/user/` | GET | Get current user info |
 
@@ -186,13 +168,13 @@ HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/upload/` | POST | Upload CSV file (multipart/form-data) |
-| `/api/datasets/` | GET | Get upload history (last 5 datasets) |
-| `/api/datasets/{id}/` | GET | Get specific dataset with equipment list |
+| `/api/upload/` | POST | Upload CSV file |
+| `/api/datasets/` | GET | Get upload history (last 5) |
+| `/api/datasets/{id}/` | GET | Get specific dataset |
 | `/api/datasets/{id}/delete/` | DELETE | Delete a dataset |
 | `/api/datasets/{id}/pdf/` | GET | Download PDF report |
 
-### Example API Response (Upload):
+### Example Response (Upload):
 ```json
 {
   "message": "File uploaded successfully",
@@ -211,119 +193,92 @@ HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
 }
 ```
 
-## 🔐 Authentication
+---
 
-The application uses token-based authentication:
+## 🧪 Testing Instructions
 
-1. Register a new account or login
-2. The token is stored locally (localStorage for web, memory for desktop)
-3. All API requests include the token in the `Authorization: Token <token>` header
-4. Tokens can be invalidated by logging out
+### For Interviewers/Reviewers:
 
-## 🧪 Testing the Application
+**Option A: Run Everything Locally (Recommended)**
+```bash
+# Terminal 1 - Backend
+cd backend && pip install -r requirements.txt && python manage.py migrate && python manage.py runserver
 
-### Quick Test Steps:
+# Terminal 2 - Frontend
+cd frontend-web && npm install && npm start
 
-1. **Start Backend**: 
-   ```bash
-   cd backend && python manage.py runserver
-   ```
+# Open browser: http://localhost:3000
+```
 
-2. **Start Frontend** (in new terminal):
-   ```bash
-   cd frontend-web && npm start
-   ```
+**Option B: Use Live Frontend with Local Backend**
+1. Start backend locally (see above)
+2. Visit: https://frontend-c0t6d2cbr-sree-s-projects-a699a381.vercel.app
+3. The frontend will connect to `localhost:8000` by default
 
-3. **Open Browser**: Go to `http://localhost:3000`
+**Test Flow:**
+1. Register a new account
+2. Login with your credentials
+3. Upload `sample_equipment_data.csv`
+4. View charts and statistics
+5. Download PDF report
+6. Check upload history
 
-4. **Register**: Create a new account
+---
 
-5. **Upload CSV**: Use `sample_equipment_data.csv` from the project root
+## 📁 Project Structure
 
-6. **View Results**: See statistics, charts, and download PDF report
+```
+chemical-equipment-visualizer/
+├── backend/                    # Django Backend
+│   ├── chemical_visualizer/    # Django project settings
+│   ├── api/                    # REST API app
+│   ├── manage.py
+│   └── requirements.txt
+├── frontend-web/               # React Web Frontend
+│   ├── src/
+│   │   ├── components/         # Charts, DataTable, FileUpload
+│   │   ├── pages/              # Dashboard, Login, Register
+│   │   └── services/           # API client
+│   └── package.json
+├── frontend-desktop/           # PyQt5 Desktop Frontend
+│   ├── main.py
+│   ├── api_service.py
+│   └── requirements.txt
+├── sample_equipment_data.csv   # Sample test data
+└── README.md
+```
+
+---
 
 ## 🚀 Deployment
 
-### Option 1: Deploy to Render (Recommended - Free Tier)
+### Deploy Backend to Render (Free)
 
-#### Step 1: Deploy Backend
-1. Go to [render.com](https://render.com) and sign up
+1. Go to [render.com](https://render.com) → Sign up with GitHub
 2. Click **"New +"** → **"Web Service"**
-3. Connect your GitHub account and select `chemical-equipment-visualizer`
+3. Select repository: `chemical-equipment-visualizer`
 4. Configure:
-   - **Name**: `chemical-visualizer-api`
    - **Root Directory**: `backend`
-   - **Build Command**: 
-     ```
-     pip install -r requirements.txt && pip install gunicorn whitenoise && python manage.py migrate && python manage.py collectstatic --noinput
-     ```
+   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate`
    - **Start Command**: `gunicorn chemical_visualizer.wsgi:application`
-5. Add Environment Variables:
-   | Key | Value |
-   |-----|-------|
-   | `DJANGO_SETTINGS_MODULE` | `chemical_visualizer.settings_prod` |
-   | `DJANGO_SECRET_KEY` | `your-secret-key-min-50-chars` |
-   | `CORS_ALLOW_ALL` | `true` |
-6. Click **"Create Web Service"**
+5. Add environment variables:
+   - `DJANGO_SECRET_KEY`: (generate a random key)
+   - `CORS_ALLOW_ALL`: `true`
+6. Deploy!
 
-#### Step 2: Deploy Frontend
-1. Click **"New +"** → **"Static Site"**
-2. Select same repository
-3. Configure:
-   - **Name**: `chemical-visualizer-web`
-   - **Root Directory**: `frontend-web`
-   - **Build Command**: `npm install && npm run build`
-   - **Publish Directory**: `build`
-4. Add Environment Variable:
-   | Key | Value |
-   |-----|-------|
-   | `REACT_APP_API_URL` | `https://YOUR-BACKEND-NAME.onrender.com/api` |
-5. Click **"Create Static Site"**
-
-### Option 2: Local Production Deployment
+### Deploy Frontend to Vercel (Free)
 
 ```bash
-# Terminal 1: Start Backend
-cd backend
-pip install gunicorn whitenoise
-python manage.py migrate
-gunicorn chemical_visualizer.wsgi:application --bind 0.0.0.0:8000
-
-# Terminal 2: Build and Serve Frontend
 cd frontend-web
-npm install && npm run build
-npx serve -s build -l 3000
+npm install -g vercel
+vercel --prod
 ```
 
-### Option 3: Docker Deployment
+---
 
-```bash
-# Build and run with Docker Compose
-docker-compose up --build
-```
+## 📝 License
 
-## 📱 Desktop Application Features
-
-The PyQt5 desktop application includes:
-- **Login/Register dialogs** with form validation
-- **File browser** for CSV selection
-- **Data table** with sortable columns
-- **Statistics cards** showing averages
-- **Matplotlib charts**: Pie chart, Bar chart, Line chart
-- **History panel** showing last 5 uploads
-- **PDF download** functionality
-
-## 📝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file.
 
 ## 👨‍💻 Author
 
@@ -332,4 +287,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For questions or issues, please [open an issue](https://github.com/228w1a12d7/chemical-equipment-visualizer/issues) on GitHub.
+For questions or issues, [open an issue](https://github.com/228w1a12d7/chemical-equipment-visualizer/issues) on GitHub.

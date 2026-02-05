@@ -210,25 +210,74 @@ python manage.py test
 
 ## 🚀 Deployment
 
-### Backend (Production)
+### Option 1: Deploy to Render (Recommended - Free Tier)
+
+#### Backend Deployment
+1. Create account at [render.com](https://render.com)
+2. Click "New +" → "Web Service"
+3. Connect your GitHub repository
+4. Configure:
+   - **Name**: `chemical-visualizer-api`
+   - **Root Directory**: `backend`
+   - **Build Command**: `pip install -r requirements.txt && pip install gunicorn whitenoise && python manage.py migrate && python manage.py collectstatic --noinput`
+   - **Start Command**: `gunicorn chemical_visualizer.wsgi:application`
+5. Add Environment Variables:
+   - `DJANGO_SETTINGS_MODULE`: `chemical_visualizer.settings_prod`
+   - `DJANGO_SECRET_KEY`: (generate a secret key)
+   - `ALLOWED_HOSTS`: `.onrender.com`
+   - `CORS_ALLOW_ALL`: `true`
+
+#### Frontend Deployment
+1. Click "New +" → "Static Site"
+2. Connect same repository
+3. Configure:
+   - **Name**: `chemical-visualizer-web`
+   - **Root Directory**: `frontend-web`
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `build`
+4. Add Environment Variable:
+   - `REACT_APP_API_URL`: `https://chemical-visualizer-api.onrender.com/api`
+
+### Option 2: Deploy with Railway
+
+1. Create account at [railway.app](https://railway.app)
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Select repository
+4. Railway will auto-detect the `railway.toml` configuration
+5. Add environment variable: `DJANGO_SECRET_KEY`
+
+### Option 3: Deploy Frontend to Netlify/Vercel
+
+**Netlify:**
+1. Create account at [netlify.com](https://netlify.com)
+2. Drag & drop `frontend-web/build` folder or connect GitHub
+3. Set `REACT_APP_API_URL` environment variable
+
+**Vercel:**
+1. Create account at [vercel.com](https://vercel.com)
+2. Import GitHub repository
+3. Set root directory to `frontend-web`
+4. Add `REACT_APP_API_URL` environment variable
+
+### Local Production Deployment
 
 ```bash
-# Update settings for production
-# Set DEBUG = False
-# Configure ALLOWED_HOSTS
-# Use a production database
+# Backend with Gunicorn
+cd backend
+pip install gunicorn whitenoise
+gunicorn chemical_visualizer.wsgi:application --bind 0.0.0.0:8000
 
-pip install gunicorn
-gunicorn chemical_visualizer.wsgi:application
-```
-
-### Web Frontend (Production)
-
-```bash
+# Frontend build
 cd frontend-web
 npm run build
-# Serve the build folder with nginx or similar
+npx serve -s build -l 3000
 ```
+
+## 🌐 Live Demo
+
+- **Web Application**: [https://chemical-visualizer-web.onrender.com](https://chemical-visualizer-web.onrender.com) *(Deploy to get your own link)*
+- **API Endpoint**: [https://chemical-visualizer-api.onrender.com/api](https://chemical-visualizer-api.onrender.com/api)
+
 
 ## 📝 Contributing
 

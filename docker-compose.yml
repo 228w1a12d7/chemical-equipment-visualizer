@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: chemical-backend
+    environment:
+      - DJANGO_SETTINGS_MODULE=chemical_visualizer.settings_prod
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-your-secret-key-change-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,backend
+      - CORS_ALLOWED_ORIGINS=http://localhost,http://localhost:80,http://frontend
+      - DATABASE_URL=sqlite:///db.sqlite3
+    volumes:
+      - backend_data:/app/db.sqlite3
+      - media_data:/app/media
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend-web
+      args:
+        - REACT_APP_API_URL=http://localhost:8000/api
+    container_name: chemical-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_data:
+  media_data:

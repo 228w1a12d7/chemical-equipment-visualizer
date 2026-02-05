@@ -111,16 +111,22 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Logout button clicked - showing modal');
     setShowLogoutModal(true);
   };
 
   const confirmLogout = async () => {
+    console.log('Confirm logout clicked');
+    setShowLogoutModal(false);
     await logout();
     navigate('/login');
   };
 
   const cancelLogout = () => {
+    console.log('Cancel logout clicked');
     setShowLogoutModal(false);
   };
 
@@ -180,7 +186,7 @@ const Dashboard = () => {
               </a>
             </li>
             <li style={{ marginTop: '30px' }}>
-              <button onClick={handleLogout}>
+              <button type="button" onClick={handleLogout}>
                 <span>🚪</span>
                 <span>Logout</span>
               </button>

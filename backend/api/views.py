@@ -198,12 +198,13 @@ def upload_csv(request):
         
         # Prepare response
         equipment_list = [{
+            'id': idx + 1,
             'name': row['Equipment Name'],
             'type': row['Type'],
             'flowrate': row['Flowrate'],
             'pressure': row['Pressure'],
             'temperature': row['Temperature']
-        } for _, row in df.iterrows()]
+        } for idx, row in df.iterrows()]
         
         return Response({
             'message': 'File uploaded successfully',
@@ -238,6 +239,7 @@ def get_dataset_summary(request, dataset_id):
         dataset = DatasetUpload.objects.get(id=dataset_id, user=request.user)
         
         equipment_list = [{
+            'id': eq.id,
             'name': eq.name,
             'type': eq.equipment_type,
             'flowrate': eq.flowrate,

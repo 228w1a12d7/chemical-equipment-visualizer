@@ -776,7 +776,7 @@ class MainWindow(QMainWindow):
         
         # Update table
         if equipment_list:
-            columns = ["equipment_id", "equipment_name", "equipment_type", 
+            columns = ["id", "name", "type", 
                       "flowrate", "pressure", "temperature"]
             column_headers = ["ID", "Name", "Type", "Flowrate", "Pressure", "Temperature"]
             self.data_table.setColumnCount(len(columns))
@@ -815,8 +815,8 @@ class MainWindow(QMainWindow):
         if equipment_list:
             import pandas as pd
             df = pd.DataFrame(equipment_list)
-            if 'equipment_type' in df.columns:
-                grouped = df.groupby('equipment_type').agg({
+            if 'type' in df.columns:
+                grouped = df.groupby('type').agg({
                     'flowrate': 'mean',
                     'pressure': 'mean', 
                     'temperature': 'mean'
@@ -833,7 +833,7 @@ class MainWindow(QMainWindow):
                                         width, label='Temperature', color=CHART_COLORS[2])
                 
                 self.bar_chart.axes.set_xticks(x)
-                self.bar_chart.axes.set_xticklabels(grouped['equipment_type'])
+                self.bar_chart.axes.set_xticklabels(grouped['type'], rotation=45, ha='right')
                 self.bar_chart.axes.legend()
                 self.bar_chart.axes.set_title("Average Parameters by Equipment Type")
         self.bar_chart.draw()

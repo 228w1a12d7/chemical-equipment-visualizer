@@ -152,7 +152,17 @@ class LoginDialog(QDialog):
         if result["success"]:
             self.accept()
         else:
-            QMessageBox.warning(self, "Login Failed", result.get("error", "Invalid credentials"))
+            error_msg = result.get("error", "Invalid credentials")
+            if "not found" in error_msg.lower() or "sign up" in error_msg.lower():
+                reply = QMessageBox.question(
+                    self, "User Not Found",
+                    "User not found. Would you like to sign up?",
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    self.show_register()
+            else:
+                QMessageBox.warning(self, "Login Failed", error_msg)
     
     def show_register(self):
         dialog = RegisterDialog(self)

@@ -53,6 +53,16 @@ def login_user(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
+    # Check if user exists first
+    from django.contrib.auth.models import User
+    user_exists = User.objects.filter(username=username).exists()
+    
+    if not user_exists:
+        return Response(
+            {'error': 'User not found. Please sign up first to create an account.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
     user = authenticate(username=username, password=password)
     
     if user:
@@ -63,7 +73,7 @@ def login_user(request):
             'token': token.key
         })
     return Response(
-        {'error': 'Invalid credentials'},
+        {'error': 'Incorrect password. Please try again.'},
         status=status.HTTP_401_UNAUTHORIZED
     )
 

@@ -19,7 +19,12 @@ const Login = () => {
       await login(username, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
+      const errorMsg = err.response?.data?.error || 'Login failed. Please try again.';
+      if (err.response?.status === 404) {
+        setError('User not found. Please sign up first!');
+      } else {
+        setError(errorMsg);
+      }
     } finally {
       setLoading(false);
     }

@@ -275,16 +275,11 @@ vercel --prod
 ```
 
 ---
-
-## 📝 License
-
-MIT License - see [LICENSE](LICENSE) file.
-
 ## 👨‍💻 Author
 
 **Kundana Sree**
-- GitHub: [@228w1a12d7](https://github.com/228w1a12d7)
+- Gmail: [kundanasree3989@gmail.com](kundanasree3989@gmail.com)
 
 ## 📞 Support
 
-For questions or issues, [open an issue](https://github.com/228w1a12d7/chemical-equipment-visualizer/issues) on GitHub.
+For questions or issues, [open an issue](kundanasree3989@gmail.com) on GitHub.

@@ -39,7 +39,21 @@ COLORS = {
     'text_secondary': '#64748b',
 }
 
-CHART_COLORS = ['#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+# Vibrant colors for impressive charts
+CHART_COLORS = [
+    '#4f46e5',  # Indigo
+    '#06b6d4',  # Cyan
+    '#10b981',  # Emerald
+    '#f59e0b',  # Amber
+    '#ef4444',  # Red
+    '#8b5cf6',  # Purple
+    '#ec4899',  # Pink
+    '#14b8a6',  # Teal
+    '#f97316',  # Orange
+    '#6366f1',  # Violet
+    '#84cc16',  # Lime
+    '#0ea5e9',  # Sky
+]
 
 
 class WorkerThread(QThread):
@@ -282,12 +296,15 @@ class RegisterDialog(QDialog):
 class ChartCanvas(FigureCanvas):
     """Matplotlib canvas for embedding charts in Qt."""
     
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
+    def __init__(self, parent=None, width=5, height=4, dpi=120):
+        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='#fafafa')
         self.axes = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
-        self.fig.patch.set_facecolor('white')
+        self.fig.patch.set_facecolor('#fafafa')
+        self.axes.set_facecolor('#ffffff')
+        self.fig.set_tight_layout(True)
+        self.setMinimumHeight(int(height * dpi))
 
 
 class MainWindow(QMainWindow):
@@ -616,37 +633,88 @@ class MainWindow(QMainWindow):
     def create_charts_tab(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setContentsMargins(10, 10, 10, 10)
         
         # Scroll area for charts
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet("QScrollArea { border: none; }")
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll.setStyleSheet("""
+            QScrollArea { 
+                border: none; 
+                background-color: #f8fafc;
+            }
+            QScrollBar:vertical {
+                background: #e2e8f0;
+                width: 12px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background: #94a3b8;
+                border-radius: 6px;
+                min-height: 30px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #64748b;
+            }
+        """)
         
         charts_widget = QWidget()
+        charts_widget.setStyleSheet("background-color: #f8fafc;")
         charts_layout = QVBoxLayout(charts_widget)
-        charts_layout.setSpacing(20)
+        charts_layout.setSpacing(30)
+        charts_layout.setContentsMargins(15, 15, 15, 15)
+        
+        # Styling for group boxes
+        group_style = """
+            QGroupBox {
+                font-weight: bold;
+                font-size: 16px;
+                color: #1e293b;
+                border: 2px solid #e2e8f0;
+                border-radius: 12px;
+                margin-top: 20px;
+                padding: 20px;
+                background-color: white;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 20px;
+                padding: 0 10px;
+                background-color: white;
+            }
+        """
         
         # Chart 1: Type Distribution (Pie)
-        chart1_group = QGroupBox("Equipment Type Distribution")
+        chart1_group = QGroupBox("📊 Equipment Type Distribution")
+        chart1_group.setStyleSheet(group_style)
         chart1_layout = QVBoxLayout(chart1_group)
-        self.pie_chart = ChartCanvas(width=6, height=4)
+        chart1_layout.setContentsMargins(20, 30, 20, 20)
+        self.pie_chart = ChartCanvas(width=10, height=7)
         chart1_layout.addWidget(self.pie_chart)
         charts_layout.addWidget(chart1_group)
         
         # Chart 2: Parameter Comparison (Bar)
-        chart2_group = QGroupBox("Average Parameters by Equipment Type")
+        chart2_group = QGroupBox("📈 Average Parameters by Equipment Type")
+        chart2_group.setStyleSheet(group_style)
         chart2_layout = QVBoxLayout(chart2_group)
-        self.bar_chart = ChartCanvas(width=8, height=4)
+        chart2_layout.setContentsMargins(20, 30, 20, 20)
+        self.bar_chart = ChartCanvas(width=14, height=8)
         chart2_layout.addWidget(self.bar_chart)
         charts_layout.addWidget(chart2_group)
         
         # Chart 3: Parameter Trends (Line)
-        chart3_group = QGroupBox("Equipment Parameters Overview")
+        chart3_group = QGroupBox("📉 Equipment Parameters Overview")
+        chart3_group.setStyleSheet(group_style)
         chart3_layout = QVBoxLayout(chart3_group)
-        self.line_chart = ChartCanvas(width=8, height=4)
+        chart3_layout.setContentsMargins(20, 30, 20, 20)
+        self.line_chart = ChartCanvas(width=14, height=7)
         chart3_layout.addWidget(self.line_chart)
         charts_layout.addWidget(chart3_group)
+        
+        # Add spacer at bottom
+        charts_layout.addSpacing(30)
         
         scroll.setWidget(charts_widget)
         layout.addWidget(scroll)
@@ -800,17 +868,33 @@ class MainWindow(QMainWindow):
         equipment_list = self.current_data.get("equipment_list", [])
         type_distribution = summary.get("type_distribution", {})
         
-        # Pie Chart - Type Distribution
+        # Pie Chart - Type Distribution (Enhanced)
         self.pie_chart.axes.clear()
         if type_distribution:
             labels = list(type_distribution.keys())
             sizes = list(type_distribution.values())
             colors = CHART_COLORS[:len(labels)]
-            self.pie_chart.axes.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%')
-            self.pie_chart.axes.set_title("Equipment Type Distribution")
+            explode = [0.03] * len(labels)  # Slight explosion for all slices
+            
+            wedges, texts, autotexts = self.pie_chart.axes.pie(
+                sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                explode=explode,
+                textprops={'fontsize': 11, 'color': '#1e293b'}, 
+                pctdistance=0.75,
+                shadow=True,
+                startangle=90,
+                wedgeprops={'edgecolor': 'white', 'linewidth': 2}
+            )
+            for autotext in autotexts:
+                autotext.set_fontsize(10)
+                autotext.set_fontweight('bold')
+                autotext.set_color('white')
+            self.pie_chart.axes.set_title("Equipment Type Distribution", 
+                                          fontsize=16, fontweight='bold', color='#1e293b', pad=20)
+        self.pie_chart.fig.tight_layout()
         self.pie_chart.draw()
         
-        # Bar Chart - Average Parameters by Type
+        # Bar Chart - Average Parameters by Type (Enhanced)
         self.bar_chart.axes.clear()
         if equipment_list:
             import pandas as pd
@@ -825,35 +909,73 @@ class MainWindow(QMainWindow):
                 x = range(len(grouped))
                 width = 0.25
                 
-                self.bar_chart.axes.bar([i - width for i in x], grouped['flowrate'], 
-                                        width, label='Flowrate', color=CHART_COLORS[0])
-                self.bar_chart.axes.bar(x, grouped['pressure'], 
-                                        width, label='Pressure', color=CHART_COLORS[1])
-                self.bar_chart.axes.bar([i + width for i in x], grouped['temperature'], 
-                                        width, label='Temperature', color=CHART_COLORS[2])
+                bars1 = self.bar_chart.axes.bar([i - width for i in x], grouped['flowrate'], 
+                                        width, label='Flowrate', color=CHART_COLORS[0],
+                                        edgecolor='white', linewidth=1)
+                bars2 = self.bar_chart.axes.bar(x, grouped['pressure'], 
+                                        width, label='Pressure', color=CHART_COLORS[1],
+                                        edgecolor='white', linewidth=1)
+                bars3 = self.bar_chart.axes.bar([i + width for i in x], grouped['temperature'], 
+                                        width, label='Temperature', color=CHART_COLORS[2],
+                                        edgecolor='white', linewidth=1)
                 
                 self.bar_chart.axes.set_xticks(x)
-                self.bar_chart.axes.set_xticklabels(grouped['type'], rotation=45, ha='right')
-                self.bar_chart.axes.legend()
-                self.bar_chart.axes.set_title("Average Parameters by Equipment Type")
+                self.bar_chart.axes.set_xticklabels(grouped['type'], rotation=45, ha='right', fontsize=11)
+                self.bar_chart.axes.legend(loc='upper right', fontsize=11, framealpha=0.9)
+                self.bar_chart.axes.set_title("Average Parameters by Equipment Type", 
+                                              fontsize=16, fontweight='bold', color='#1e293b', pad=20)
+                self.bar_chart.axes.set_ylabel("Value", fontsize=12, color='#475569')
+                self.bar_chart.axes.set_xlabel("Equipment Type", fontsize=12, color='#475569')
+                self.bar_chart.axes.grid(True, axis='y', alpha=0.3, linestyle='--')
+                self.bar_chart.axes.set_axisbelow(True)
+                
+                # Add value labels on bars
+                for bars in [bars1, bars2, bars3]:
+                    for bar in bars:
+                        height = bar.get_height()
+                        if height > 0:
+                            self.bar_chart.axes.annotate(f'{height:.0f}',
+                                xy=(bar.get_x() + bar.get_width() / 2, height),
+                                xytext=(0, 3), textcoords="offset points",
+                                ha='center', va='bottom', fontsize=8, fontweight='bold')
+        
+        self.bar_chart.fig.tight_layout()
         self.bar_chart.draw()
         
-        # Line Chart - Equipment Overview
+        # Line Chart - Equipment Overview (Enhanced)
         self.line_chart.axes.clear()
         if equipment_list:
-            x = range(len(equipment_list))
+            x = list(range(len(equipment_list)))
             flowrates = [item.get('flowrate', 0) for item in equipment_list]
             pressures = [item.get('pressure', 0) for item in equipment_list]
             temperatures = [item.get('temperature', 0) for item in equipment_list]
             
-            self.line_chart.axes.plot(x, flowrates, marker='o', label='Flowrate', color=CHART_COLORS[0])
-            self.line_chart.axes.plot(x, pressures, marker='s', label='Pressure', color=CHART_COLORS[1])
-            self.line_chart.axes.plot(x, temperatures, marker='^', label='Temperature', color=CHART_COLORS[2])
+            # Plot with fill under lines for modern look
+            self.line_chart.axes.fill_between(x, flowrates, alpha=0.15, color=CHART_COLORS[0])
+            self.line_chart.axes.plot(x, flowrates, marker='o', label='Flowrate', 
+                                      color=CHART_COLORS[0], linewidth=2.5, markersize=7)
             
-            self.line_chart.axes.legend()
-            self.line_chart.axes.set_xlabel("Equipment Index")
-            self.line_chart.axes.set_ylabel("Value")
-            self.line_chart.axes.set_title("Equipment Parameters Overview")
+            self.line_chart.axes.fill_between(x, pressures, alpha=0.15, color=CHART_COLORS[1])
+            self.line_chart.axes.plot(x, pressures, marker='s', label='Pressure', 
+                                      color=CHART_COLORS[1], linewidth=2.5, markersize=7)
+            
+            self.line_chart.axes.fill_between(x, temperatures, alpha=0.15, color=CHART_COLORS[2])
+            self.line_chart.axes.plot(x, temperatures, marker='^', label='Temperature', 
+                                      color=CHART_COLORS[2], linewidth=2.5, markersize=7)
+            
+            self.line_chart.axes.legend(loc='upper right', fontsize=11, framealpha=0.9)
+            self.line_chart.axes.set_xlabel("Equipment Index", fontsize=12, color='#475569')
+            self.line_chart.axes.set_ylabel("Value", fontsize=12, color='#475569')
+            self.line_chart.axes.set_title("Equipment Parameters Overview", 
+                                           fontsize=16, fontweight='bold', color='#1e293b', pad=20)
+            self.line_chart.axes.grid(True, alpha=0.3, linestyle='--')
+            self.line_chart.axes.set_axisbelow(True)
+            
+            # Set x-axis ticks for better readability
+            if len(x) > 15:
+                step = max(1, len(x) // 10)
+                self.line_chart.axes.set_xticks(x[::step])
+        self.line_chart.fig.tight_layout()
         self.line_chart.draw()
     
     def load_history(self):

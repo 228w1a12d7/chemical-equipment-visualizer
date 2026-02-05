@@ -20,6 +20,7 @@ const Dashboard = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -110,9 +111,17 @@ const Dashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   const formatDate = (dateString) => {
@@ -336,6 +345,25 @@ const Dashboard = () => {
           </div>
         )}
       </main>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-icon">🚪</div>
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to logout?</p>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={cancelLogout}>
+                Cancel
+              </button>
+              <button className="btn-confirm" onClick={confirmLogout}>
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

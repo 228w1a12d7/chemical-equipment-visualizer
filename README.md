@@ -34,27 +34,50 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 chemical-equipment-visualizer/
 ├── backend/                    # Django Backend
 │   ├── chemical_visualizer/    # Django project settings
+│   │   ├── settings.py         # Development settings
+│   │   ├── settings_prod.py    # Production settings
+│   │   ├── urls.py             # Main URL configuration
+│   │   └── wsgi.py             # WSGI application
 │   ├── api/                    # REST API app
 │   │   ├── models.py           # Database models
 │   │   ├── views.py            # API views
 │   │   ├── serializers.py      # DRF serializers
 │   │   └── urls.py             # API routes
 │   ├── manage.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── Dockerfile
 ├── frontend-web/               # React Web Frontend
 │   ├── public/
+│   │   └── index.html
 │   ├── src/
 │   │   ├── components/         # Reusable components
+│   │   │   ├── Charts/         # Chart.js visualizations
+│   │   │   ├── DataTable/      # Data table component
+│   │   │   └── FileUpload/     # CSV upload component
 │   │   ├── context/            # Auth context
 │   │   ├── pages/              # Page components
+│   │   │   ├── Dashboard.js    # Main dashboard
+│   │   │   ├── Login.js        # Login page
+│   │   │   └── Register.js     # Registration page
 │   │   ├── services/           # API service
+│   │   │   └── api.js          # Axios API client
 │   │   └── App.js
-│   └── package.json
+│   ├── package.json
+│   ├── Dockerfile
+│   └── nginx.conf
 ├── frontend-desktop/           # PyQt5 Desktop Frontend
 │   ├── main.py                 # Main application
 │   ├── api_service.py          # API client
 │   └── requirements.txt
 ├── sample_equipment_data.csv   # Sample data for testing
+├── docker-compose.yml          # Docker deployment
+├── render.yaml                 # Render.com deployment
+├── railway.toml                # Railway deployment
+├── netlify.toml                # Netlify deployment
+├── vercel.json                 # Vercel deployment
+├── deploy.sh                   # Local deployment script
+├── stop.sh                     # Stop services script
+├── build.sh                    # Build script
 └── README.md
 ```
 
@@ -69,7 +92,7 @@ chemical-equipment-visualizer/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/chemical-equipment-visualizer.git
+git clone https://github.com/228w1a12d7/chemical-equipment-visualizer.git
 cd chemical-equipment-visualizer
 ```
 
@@ -94,9 +117,6 @@ pip install -r requirements.txt
 # Run migrations
 python manage.py migrate
 
-# Create a superuser (optional, for admin access)
-python manage.py createsuperuser
-
 # Start the development server
 python manage.py runserver
 ```
@@ -106,7 +126,7 @@ The backend API will be running at `http://localhost:8000/api/`
 ### 3. Web Frontend Setup
 
 ```bash
-# Open a new terminal
+# Open a new terminal and navigate to frontend-web
 cd frontend-web
 
 # Install dependencies
@@ -121,14 +141,10 @@ The web application will be running at `http://localhost:3000`
 ### 4. Desktop Frontend Setup
 
 ```bash
-# Open a new terminal
+# Open a new terminal and navigate to frontend-desktop
 cd frontend-desktop
 
-# Create virtual environment (or use the same as backend)
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-
-# Install dependencies
+# Install dependencies (use the same venv or create new)
 pip install -r requirements.txt
 
 # Run the application
@@ -137,15 +153,23 @@ python main.py
 
 ## 📊 Sample Data
 
-A sample CSV file (`sample_equipment_data.csv`) is included for testing. The CSV must contain these columns:
+A sample CSV file (`sample_equipment_data.csv`) is included for testing. The CSV contains 25 equipment records with these columns:
 
-| Column | Description |
-|--------|-------------|
-| Equipment Name | Unique identifier for the equipment |
-| Type | Equipment type (e.g., Reactor, Pump, Heat Exchanger) |
-| Flowrate | Flow rate value (numeric) |
-| Pressure | Pressure value (numeric) |
-| Temperature | Temperature value (numeric) |
+| Column | Description | Example |
+|--------|-------------|---------|
+| Equipment Name | Unique identifier | Reactor-001 |
+| Type | Equipment type | Reactor, Pump, Heat Exchanger |
+| Flowrate | Flow rate value | 150.5 |
+| Pressure | Pressure value | 25.3 |
+| Temperature | Temperature value | 180.0 |
+
+### Sample Data Preview:
+```csv
+Equipment Name,Type,Flowrate,Pressure,Temperature
+Reactor-001,Reactor,150.5,25.3,180.0
+Pump-001,Pump,200.0,45.0,25.0
+HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
+```
 
 ## 🔌 API Endpoints
 
@@ -153,131 +177,141 @@ A sample CSV file (`sample_equipment_data.csv`) is included for testing. The CSV
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/auth/register/` | POST | Register new user |
-| `/api/auth/login/` | POST | Login user |
+| `/api/auth/register/` | POST | Register new user (requires: username, email, password, password_confirm) |
+| `/api/auth/login/` | POST | Login user (requires: username, password) |
 | `/api/auth/logout/` | POST | Logout user |
 | `/api/auth/user/` | GET | Get current user info |
 
-### Data
+### Data Operations
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/api/upload/` | POST | Upload CSV file |
-| `/api/datasets/` | GET | Get upload history (last 5) |
-| `/api/datasets/{id}/` | GET | Get specific dataset |
-| `/api/datasets/{id}/delete/` | DELETE | Delete dataset |
+| `/api/upload/` | POST | Upload CSV file (multipart/form-data) |
+| `/api/datasets/` | GET | Get upload history (last 5 datasets) |
+| `/api/datasets/{id}/` | GET | Get specific dataset with equipment list |
+| `/api/datasets/{id}/delete/` | DELETE | Delete a dataset |
 | `/api/datasets/{id}/pdf/` | GET | Download PDF report |
 
-## 📸 Screenshots
-
-### Web Application
-- **Dashboard**: Upload CSV files and view data summary
-- **Data View**: Table view with statistics cards
-- **Charts**: Interactive pie charts and bar graphs
-- **History**: Access previous uploads
-
-### Desktop Application
-- **Login**: Secure authentication
-- **Upload**: File picker for CSV selection
-- **Data View**: Table and statistics
-- **Charts**: Matplotlib visualizations
+### Example API Response (Upload):
+```json
+{
+  "message": "File uploaded successfully",
+  "dataset_id": 1,
+  "summary": {
+    "total_equipment": 25,
+    "avg_flowrate": 234.62,
+    "avg_pressure": 31.34,
+    "avg_temperature": 82.66,
+    "type_distribution": {
+      "Reactor": 5,
+      "Pump": 4,
+      "Heat Exchanger": 3
+    }
+  }
+}
+```
 
 ## 🔐 Authentication
 
 The application uses token-based authentication:
 
 1. Register a new account or login
-2. The token is stored locally
-3. All API requests include the token in the `Authorization` header
+2. The token is stored locally (localStorage for web, memory for desktop)
+3. All API requests include the token in the `Authorization: Token <token>` header
 4. Tokens can be invalidated by logging out
 
-## 🧪 Testing
+## 🧪 Testing the Application
 
-### Backend Tests
+### Quick Test Steps:
 
-```bash
-cd backend
-python manage.py test
-```
+1. **Start Backend**: 
+   ```bash
+   cd backend && python manage.py runserver
+   ```
 
-### Using Sample Data
+2. **Start Frontend** (in new terminal):
+   ```bash
+   cd frontend-web && npm start
+   ```
 
-1. Start the backend server
-2. Launch either the web or desktop frontend
-3. Register/Login with a test account
-4. Upload the `sample_equipment_data.csv` file
-5. View the generated statistics and charts
+3. **Open Browser**: Go to `http://localhost:3000`
+
+4. **Register**: Create a new account
+
+5. **Upload CSV**: Use `sample_equipment_data.csv` from the project root
+
+6. **View Results**: See statistics, charts, and download PDF report
 
 ## 🚀 Deployment
 
 ### Option 1: Deploy to Render (Recommended - Free Tier)
 
-#### Backend Deployment
-1. Create account at [render.com](https://render.com)
-2. Click "New +" → "Web Service"
-3. Connect your GitHub repository
+#### Step 1: Deploy Backend
+1. Go to [render.com](https://render.com) and sign up
+2. Click **"New +"** → **"Web Service"**
+3. Connect your GitHub account and select `chemical-equipment-visualizer`
 4. Configure:
    - **Name**: `chemical-visualizer-api`
    - **Root Directory**: `backend`
-   - **Build Command**: `pip install -r requirements.txt && pip install gunicorn whitenoise && python manage.py migrate && python manage.py collectstatic --noinput`
+   - **Build Command**: 
+     ```
+     pip install -r requirements.txt && pip install gunicorn whitenoise && python manage.py migrate && python manage.py collectstatic --noinput
+     ```
    - **Start Command**: `gunicorn chemical_visualizer.wsgi:application`
 5. Add Environment Variables:
-   - `DJANGO_SETTINGS_MODULE`: `chemical_visualizer.settings_prod`
-   - `DJANGO_SECRET_KEY`: (generate a secret key)
-   - `ALLOWED_HOSTS`: `.onrender.com`
-   - `CORS_ALLOW_ALL`: `true`
+   | Key | Value |
+   |-----|-------|
+   | `DJANGO_SETTINGS_MODULE` | `chemical_visualizer.settings_prod` |
+   | `DJANGO_SECRET_KEY` | `your-secret-key-min-50-chars` |
+   | `CORS_ALLOW_ALL` | `true` |
+6. Click **"Create Web Service"**
 
-#### Frontend Deployment
-1. Click "New +" → "Static Site"
-2. Connect same repository
+#### Step 2: Deploy Frontend
+1. Click **"New +"** → **"Static Site"**
+2. Select same repository
 3. Configure:
    - **Name**: `chemical-visualizer-web`
    - **Root Directory**: `frontend-web`
    - **Build Command**: `npm install && npm run build`
    - **Publish Directory**: `build`
 4. Add Environment Variable:
-   - `REACT_APP_API_URL`: `https://chemical-visualizer-api.onrender.com/api`
+   | Key | Value |
+   |-----|-------|
+   | `REACT_APP_API_URL` | `https://YOUR-BACKEND-NAME.onrender.com/api` |
+5. Click **"Create Static Site"**
 
-### Option 2: Deploy with Railway
-
-1. Create account at [railway.app](https://railway.app)
-2. Click "New Project" → "Deploy from GitHub repo"
-3. Select repository
-4. Railway will auto-detect the `railway.toml` configuration
-5. Add environment variable: `DJANGO_SECRET_KEY`
-
-### Option 3: Deploy Frontend to Netlify/Vercel
-
-**Netlify:**
-1. Create account at [netlify.com](https://netlify.com)
-2. Drag & drop `frontend-web/build` folder or connect GitHub
-3. Set `REACT_APP_API_URL` environment variable
-
-**Vercel:**
-1. Create account at [vercel.com](https://vercel.com)
-2. Import GitHub repository
-3. Set root directory to `frontend-web`
-4. Add `REACT_APP_API_URL` environment variable
-
-### Local Production Deployment
+### Option 2: Local Production Deployment
 
 ```bash
-# Backend with Gunicorn
+# Terminal 1: Start Backend
 cd backend
 pip install gunicorn whitenoise
+python manage.py migrate
 gunicorn chemical_visualizer.wsgi:application --bind 0.0.0.0:8000
 
-# Frontend build
+# Terminal 2: Build and Serve Frontend
 cd frontend-web
-npm run build
+npm install && npm run build
 npx serve -s build -l 3000
 ```
 
-## 🌐 Live Demo
+### Option 3: Docker Deployment
 
-- **Web Application**: [https://chemical-visualizer-web.onrender.com](https://chemical-visualizer-web.onrender.com) *(Deploy to get your own link)*
-- **API Endpoint**: [https://chemical-visualizer-api.onrender.com/api](https://chemical-visualizer-api.onrender.com/api)
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+```
 
+## 📱 Desktop Application Features
+
+The PyQt5 desktop application includes:
+- **Login/Register dialogs** with form validation
+- **File browser** for CSV selection
+- **Data table** with sortable columns
+- **Statistics cards** showing averages
+- **Matplotlib charts**: Pie chart, Bar chart, Line chart
+- **History panel** showing last 5 uploads
+- **PDF download** functionality
 
 ## 📝 Contributing
 
@@ -291,13 +325,11 @@ npx serve -s build -l 3000
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## 👨‍💻 Author
 
-- Django REST Framework for the excellent API toolkit
-- React and Chart.js for web visualizations
-- PyQt5 and Matplotlib for desktop capabilities
-- Pandas for data processing
+**Kundana Sree**
+- GitHub: [@228w1a12d7](https://github.com/228w1a12d7)
 
 ## 📞 Support
 
-For questions or issues, please open an issue on GitHub.
+For questions or issues, please [open an issue](https://github.com/228w1a12d7/chemical-equipment-visualizer/issues) on GitHub.

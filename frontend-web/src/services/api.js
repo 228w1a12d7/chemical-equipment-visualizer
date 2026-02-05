@@ -22,10 +22,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Don't redirect on login/register pages - let them handle errors
-    const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
-                           error.config?.url?.includes('/auth/register');
+    // Don't redirect on auth endpoints - let them handle their own errors
+    const url = error.config?.url || '';
+    const isAuthEndpoint = url.includes('/auth/');
     
+    // Only redirect for 401 on protected endpoints, NOT on login/register
     if (error.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

@@ -557,18 +557,34 @@ class MainWindow(QMainWindow):
                 background-color: white;
                 border: 1px solid #e2e8f0;
                 border-radius: 8px;
+                font-size: 13px;
+                color: #1e293b;
             }
             QTableWidget::item {
-                padding: 8px;
+                padding: 10px;
+                color: #1e293b;
+                font-size: 13px;
             }
             QHeaderView::section {
-                background-color: #f1f5f9;
-                padding: 10px;
+                background-color: #4f46e5;
+                color: white;
+                padding: 12px;
                 border: none;
                 font-weight: bold;
+                font-size: 13px;
+            }
+            QTableWidget::item:selected {
+                background-color: #e0e7ff;
+                color: #1e293b;
             }
         """)
         self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.data_table.setAlternatingRowColors(True)
+        self.data_table.setStyleSheet(self.data_table.styleSheet() + """
+            QTableWidget::item:alternate {
+                background-color: #f8fafc;
+            }
+        """)
         layout.addWidget(self.data_table)
         
         return widget
@@ -661,13 +677,19 @@ class MainWindow(QMainWindow):
                 background-color: white;
                 border: 1px solid #e2e8f0;
                 border-radius: 8px;
+                font-size: 14px;
+                color: #1e293b;
             }
             QListWidget::item {
-                padding: 15px;
+                padding: 18px;
                 border-bottom: 1px solid #e2e8f0;
+                color: #1e293b;
+                font-size: 14px;
+                min-height: 50px;
             }
             QListWidget::item:selected {
                 background-color: #e0e7ff;
+                color: #1e293b;
             }
             QListWidget::item:hover {
                 background-color: #f1f5f9;
@@ -756,14 +778,17 @@ class MainWindow(QMainWindow):
         if equipment_list:
             columns = ["equipment_id", "equipment_name", "equipment_type", 
                       "flowrate", "pressure", "temperature"]
+            column_headers = ["ID", "Name", "Type", "Flowrate", "Pressure", "Temperature"]
             self.data_table.setColumnCount(len(columns))
-            self.data_table.setHorizontalHeaderLabels([c.replace("_", " ").title() for c in columns])
+            self.data_table.setHorizontalHeaderLabels(column_headers)
             self.data_table.setRowCount(len(equipment_list))
             
             for row, item in enumerate(equipment_list):
                 for col, key in enumerate(columns):
                     value = item.get(key, "")
-                    self.data_table.setItem(row, col, QTableWidgetItem(str(value)))
+                    table_item = QTableWidgetItem(str(value))
+                    table_item.setTextAlignment(Qt.AlignCenter)
+                    self.data_table.setItem(row, col, table_item)
         
         self.pdf_btn.setEnabled(True)
     
@@ -842,10 +867,12 @@ class MainWindow(QMainWindow):
                 item = QListWidgetItem()
                 item.setText(
                     f"📄 {dataset['filename']}\n"
-                    f"   Equipment: {dataset['total_equipment']} | "
+                    f"   ID: {dataset.get('id', 'N/A')}  |  "
+                    f"Equipment: {dataset['total_equipment']}  |  "
                     f"Uploaded: {dataset['uploaded_at']}"
                 )
                 item.setData(Qt.UserRole, dataset)
+                item.setSizeHint(item.sizeHint())
                 self.history_list.addItem(item)
     
     def load_dataset_from_history(self, item):

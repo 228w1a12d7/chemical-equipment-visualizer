@@ -293,18 +293,97 @@ class RegisterDialog(QDialog):
             QMessageBox.warning(self, "Registration Failed", error_msg)
 
 
+class LogoutConfirmDialog(QDialog):
+    """Custom styled logout confirmation dialog."""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Confirm Logout")
+        self.setFixedSize(350, 200)
+        self.setModal(True)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        self.setStyleSheet(f"""
+            QDialog {{
+                background-color: white;
+                border-radius: 12px;
+            }}
+            QLabel {{
+                color: #1e293b;
+            }}
+            QPushButton {{
+                min-height: 40px;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 14px;
+            }}
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        # Icon
+        icon_label = QLabel("🚪")
+        icon_label.setFont(QFont("Arial", 36))
+        icon_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(icon_label)
+        
+        # Message
+        message = QLabel("Are you sure you want to logout?")
+        message.setFont(QFont("Arial", 14))
+        message.setAlignment(Qt.AlignCenter)
+        message.setStyleSheet("color: #374151; margin: 10px 0;")
+        layout.addWidget(message)
+        
+        # Buttons
+        btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(15)
+        
+        self.cancel_btn = QPushButton("Cancel")
+        self.cancel_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: #e5e7eb;
+                color: #374151;
+                border: none;
+            }}
+            QPushButton:hover {{
+                background-color: #d1d5db;
+            }}
+        """)
+        self.cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(self.cancel_btn)
+        
+        self.logout_btn = QPushButton("Yes, Logout")
+        self.logout_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {COLORS['danger']};
+                color: white;
+                border: none;
+            }}
+            QPushButton:hover {{
+                background-color: #dc2626;
+            }}
+        """)
+        self.logout_btn.clicked.connect(self.accept)
+        btn_layout.addWidget(self.logout_btn)
+        
+        layout.addLayout(btn_layout)
+
+
 class ChartCanvas(FigureCanvas):
     """Matplotlib canvas for embedding charts in Qt."""
     
-    def __init__(self, parent=None, width=5, height=4, dpi=120):
-        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='#fafafa')
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor='white')
         self.axes = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
-        self.fig.patch.set_facecolor('#fafafa')
-        self.axes.set_facecolor('#ffffff')
+        self.fig.patch.set_facecolor('white')
+        self.axes.set_facecolor('#fafafa')
         self.fig.set_tight_layout(True)
-        self.setMinimumHeight(int(height * dpi))
+        self.setMinimumHeight(int(height * dpi * 0.9))
 
 
 class MainWindow(QMainWindow):
@@ -346,22 +425,42 @@ class MainWindow(QMainWindow):
         # Tab widget
         self.tabs = QTabWidget()
         self.tabs.setStyleSheet("""
-            QTabWidget::pane { border: none; background: white; border-radius: 8px; }
-            QTabBar::tab { padding: 10px 20px; margin-right: 5px; }
-            QTabBar::tab:selected { background: #4f46e5; color: white; border-radius: 6px; }
+            QTabWidget::pane { 
+                border: none; 
+                background: white; 
+                border-radius: 8px; 
+            }
+            QTabBar::tab { 
+                padding: 12px 30px; 
+                margin-right: 10px; 
+                background: #e2e8f0;
+                color: #1e293b;
+                font-size: 14px;
+                font-weight: 600;
+                border-radius: 6px;
+                min-width: 80px;
+            }
+            QTabBar::tab:selected { 
+                background: #4f46e5; 
+                color: white; 
+                border-radius: 6px; 
+            }
+            QTabBar::tab:hover:!selected {
+                background: #cbd5e1;
+            }
         """)
         
-        self.tabs.addTab(self.create_upload_tab(), "📤 Upload")
-        self.tabs.addTab(self.create_data_tab(), "📊 Data")
-        self.tabs.addTab(self.create_charts_tab(), "📈 Charts")
-        self.tabs.addTab(self.create_history_tab(), "📋 History")
+        self.tabs.addTab(self.create_upload_tab(), "  Upload  ")
+        self.tabs.addTab(self.create_data_tab(), "  Data  ")
+        self.tabs.addTab(self.create_charts_tab(), "  Charts  ")
+        self.tabs.addTab(self.create_history_tab(), "  History  ")
         
         content_layout.addWidget(self.tabs)
         main_layout.addWidget(content, 1)
     
     def create_sidebar(self):
         sidebar = QFrame()
-        sidebar.setFixedWidth(220)
+        sidebar.setFixedWidth(180)
         sidebar.setStyleSheet(f"""
             QFrame {{
                 background-color: {COLORS['text']};
@@ -405,23 +504,25 @@ class MainWindow(QMainWindow):
         header.setStyleSheet(f"""
             QFrame {{
                 background-color: {COLORS['card']};
-                border-radius: 8px;
+                border-radius: 12px;
+                border: 1px solid #e2e8f0;
             }}
         """)
-        header.setFixedHeight(60)
+        header.setFixedHeight(70)
         
         layout = QHBoxLayout(header)
-        layout.setContentsMargins(20, 0, 20, 0)
+        layout.setContentsMargins(25, 0, 25, 0)
         
         title = QLabel("Chemical Equipment Parameter Visualizer")
-        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setStyleSheet(f"color: {COLORS['text']};")
         layout.addWidget(title)
         
         layout.addStretch()
         
         # User info placeholder
         user_label = QLabel("👤 Logged In")
-        user_label.setStyleSheet(f"color: {COLORS['text_secondary']};")
+        user_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 14px;")
         layout.addWidget(user_label)
         
         return header
@@ -465,16 +566,18 @@ class MainWindow(QMainWindow):
         
         btn_layout = QHBoxLayout()
         btn_layout.setAlignment(Qt.AlignCenter)
+        btn_layout.setSpacing(20)
         
         browse_btn = QPushButton("Browse Files")
-        browse_btn.setMinimumSize(150, 40)
+        browse_btn.setMinimumSize(160, 48)
         browse_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['primary']};
                 color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
                 font-weight: bold;
+                font-size: 14px;
             }}
             QPushButton:hover {{
                 background-color: {COLORS['secondary']};
@@ -484,15 +587,16 @@ class MainWindow(QMainWindow):
         btn_layout.addWidget(browse_btn)
         
         self.upload_btn = QPushButton("Upload")
-        self.upload_btn.setMinimumSize(150, 40)
+        self.upload_btn.setMinimumSize(160, 48)
         self.upload_btn.setEnabled(False)
         self.upload_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['success']};
                 color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
                 font-weight: bold;
+                font-size: 14px;
             }}
             QPushButton:hover {{
                 background-color: #059669;
@@ -524,16 +628,16 @@ class MainWindow(QMainWindow):
     def create_data_tab(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(15)
+        layout.setContentsMargins(25, 25, 25, 25)
+        layout.setSpacing(20)
         
         # Stats section
         self.stats_widget = QWidget()
         stats_layout = QHBoxLayout(self.stats_widget)
-        stats_layout.setSpacing(15)
+        stats_layout.setSpacing(20)
         
         self.stat_cards = {}
-        for stat in ["Total Equipment", "Avg Flowrate", "Avg Pressure", "Avg Temperature"]:
+        for stat in ["Equipment", "Avg Flow", "Avg Press", "Avg Temp"]:
             card = self.create_stat_card(stat, "0")
             self.stat_cards[stat] = card
             stats_layout.addWidget(card)
@@ -542,17 +646,20 @@ class MainWindow(QMainWindow):
         
         # Actions
         actions_layout = QHBoxLayout()
+        actions_layout.setContentsMargins(0, 10, 0, 10)
         
         self.pdf_btn = QPushButton("📄 Download PDF Report")
-        self.pdf_btn.setMinimumSize(200, 40)
+        self.pdf_btn.setMinimumSize(220, 48)
         self.pdf_btn.setEnabled(False)
         self.pdf_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['success']};
                 color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
                 font-weight: bold;
+                font-size: 14px;
+                padding: 12px 24px;
             }}
             QPushButton:hover {{
                 background-color: #059669;
@@ -573,30 +680,33 @@ class MainWindow(QMainWindow):
             QTableWidget {
                 background-color: white;
                 border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                font-size: 13px;
+                border-radius: 10px;
+                font-size: 14px;
                 color: #1e293b;
+                gridline-color: #f1f5f9;
             }
             QTableWidget::item {
-                padding: 10px;
+                padding: 15px;
                 color: #1e293b;
-                font-size: 13px;
+                font-size: 14px;
             }
             QHeaderView::section {
                 background-color: #4f46e5;
                 color: white;
-                padding: 12px;
+                padding: 16px;
                 border: none;
                 font-weight: bold;
-                font-size: 13px;
+                font-size: 14px;
             }
             QTableWidget::item:selected {
                 background-color: #e0e7ff;
                 color: #1e293b;
             }
         """)
-        self.data_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.data_table.verticalHeader().setVisible(False)
         self.data_table.setAlternatingRowColors(True)
+        self.data_table.setShowGrid(True)
+        self.data_table.verticalHeader().setDefaultSectionSize(50)
         self.data_table.setStyleSheet(self.data_table.styleSheet() + """
             QTableWidget::item:alternate {
                 background-color: #f8fafc;
@@ -611,19 +721,25 @@ class MainWindow(QMainWindow):
         card.setStyleSheet(f"""
             QFrame {{
                 background-color: {COLORS['card']};
-                border-radius: 8px;
+                border-radius: 12px;
                 padding: 15px;
+                border: 1px solid #e2e8f0;
             }}
         """)
+        card.setMinimumHeight(110)
+        card.setMinimumWidth(160)
         
         layout = QVBoxLayout(card)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(8)
         
         title_label = QLabel(title)
-        title_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px;")
+        title_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px; font-weight: 500;")
+        title_label.setWordWrap(True)
         layout.addWidget(title_label)
         
         value_label = QLabel(value)
-        value_label.setFont(QFont("Arial", 20, QFont.Bold))
+        value_label.setFont(QFont("Arial", 24, QFont.Bold))
         value_label.setStyleSheet(f"color: {COLORS['primary']};")
         value_label.setObjectName("value")
         layout.addWidget(value_label)
@@ -633,7 +749,7 @@ class MainWindow(QMainWindow):
     def create_charts_tab(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setContentsMargins(15, 15, 15, 15)
         
         # Scroll area for charts
         scroll = QScrollArea()
@@ -647,13 +763,13 @@ class MainWindow(QMainWindow):
             }
             QScrollBar:vertical {
                 background: #e2e8f0;
-                width: 12px;
-                border-radius: 6px;
+                width: 14px;
+                border-radius: 7px;
             }
             QScrollBar::handle:vertical {
                 background: #94a3b8;
-                border-radius: 6px;
-                min-height: 30px;
+                border-radius: 7px;
+                min-height: 40px;
             }
             QScrollBar::handle:vertical:hover {
                 background: #64748b;
@@ -663,8 +779,8 @@ class MainWindow(QMainWindow):
         charts_widget = QWidget()
         charts_widget.setStyleSheet("background-color: #f8fafc;")
         charts_layout = QVBoxLayout(charts_widget)
-        charts_layout.setSpacing(30)
-        charts_layout.setContentsMargins(15, 15, 15, 15)
+        charts_layout.setSpacing(25)
+        charts_layout.setContentsMargins(20, 20, 20, 20)
         
         # Styling for group boxes
         group_style = """
@@ -673,9 +789,9 @@ class MainWindow(QMainWindow):
                 font-size: 16px;
                 color: #1e293b;
                 border: 2px solid #e2e8f0;
-                border-radius: 12px;
-                margin-top: 20px;
-                padding: 20px;
+                border-radius: 14px;
+                margin-top: 25px;
+                padding: 25px;
                 background-color: white;
             }
             QGroupBox::title {
@@ -691,7 +807,7 @@ class MainWindow(QMainWindow):
         chart1_group.setStyleSheet(group_style)
         chart1_layout = QVBoxLayout(chart1_group)
         chart1_layout.setContentsMargins(20, 30, 20, 20)
-        self.pie_chart = ChartCanvas(width=10, height=7)
+        self.pie_chart = ChartCanvas(width=8, height=5)
         chart1_layout.addWidget(self.pie_chart)
         charts_layout.addWidget(chart1_group)
         
@@ -700,7 +816,7 @@ class MainWindow(QMainWindow):
         chart2_group.setStyleSheet(group_style)
         chart2_layout = QVBoxLayout(chart2_group)
         chart2_layout.setContentsMargins(20, 30, 20, 20)
-        self.bar_chart = ChartCanvas(width=14, height=8)
+        self.bar_chart = ChartCanvas(width=10, height=5)
         chart2_layout.addWidget(self.bar_chart)
         charts_layout.addWidget(chart2_group)
         
@@ -709,7 +825,7 @@ class MainWindow(QMainWindow):
         chart3_group.setStyleSheet(group_style)
         chart3_layout = QVBoxLayout(chart3_group)
         chart3_layout.setContentsMargins(20, 30, 20, 20)
-        self.line_chart = ChartCanvas(width=14, height=7)
+        self.line_chart = ChartCanvas(width=10, height=5)
         chart3_layout.addWidget(self.line_chart)
         charts_layout.addWidget(chart3_group)
         
@@ -829,16 +945,16 @@ class MainWindow(QMainWindow):
         equipment_list = self.current_data.get("equipment_list", [])
         
         # Update stats
-        self.stat_cards["Total Equipment"].findChild(QLabel, "value").setText(
+        self.stat_cards["Equipment"].findChild(QLabel, "value").setText(
             str(summary.get("total_equipment", 0))
         )
-        self.stat_cards["Avg Flowrate"].findChild(QLabel, "value").setText(
+        self.stat_cards["Avg Flow"].findChild(QLabel, "value").setText(
             f"{summary.get('avg_flowrate', 0):.2f}"
         )
-        self.stat_cards["Avg Pressure"].findChild(QLabel, "value").setText(
+        self.stat_cards["Avg Press"].findChild(QLabel, "value").setText(
             f"{summary.get('avg_pressure', 0):.2f}"
         )
-        self.stat_cards["Avg Temperature"].findChild(QLabel, "value").setText(
+        self.stat_cards["Avg Temp"].findChild(QLabel, "value").setText(
             f"{summary.get('avg_temperature', 0):.2f}"
         )
         
@@ -846,17 +962,37 @@ class MainWindow(QMainWindow):
         if equipment_list:
             columns = ["id", "name", "type", 
                       "flowrate", "pressure", "temperature"]
-            column_headers = ["ID", "Name", "Type", "Flowrate", "Pressure", "Temperature"]
-            self.data_table.setColumnCount(len(columns))
+            column_headers = ["No.", "ID", "Name", "Type", "Flowrate", "Pressure", "Temp."]
+            self.data_table.setColumnCount(len(column_headers))
             self.data_table.setHorizontalHeaderLabels(column_headers)
             self.data_table.setRowCount(len(equipment_list))
             
+            # Set column widths
+            self.data_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
+            self.data_table.setColumnWidth(0, 50)  # No. column
+            self.data_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
+            self.data_table.setColumnWidth(1, 60)  # ID column
+            self.data_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)  # Name
+            self.data_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)  # Type
+            self.data_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)
+            self.data_table.setColumnWidth(4, 80)  # Flowrate
+            self.data_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
+            self.data_table.setColumnWidth(5, 80)  # Pressure
+            self.data_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Fixed)
+            self.data_table.setColumnWidth(6, 80)  # Temp
+            
             for row, item in enumerate(equipment_list):
+                # S.No. column
+                sno_item = QTableWidgetItem(str(row + 1))
+                sno_item.setTextAlignment(Qt.AlignCenter)
+                self.data_table.setItem(row, 0, sno_item)
+                
+                # Data columns
                 for col, key in enumerate(columns):
                     value = item.get(key, "")
                     table_item = QTableWidgetItem(str(value))
                     table_item.setTextAlignment(Qt.AlignCenter)
-                    self.data_table.setItem(row, col, table_item)
+                    self.data_table.setItem(row, col + 1, table_item)
         
         self.pdf_btn.setEnabled(True)
     
@@ -1061,14 +1197,9 @@ class MainWindow(QMainWindow):
                 QMessageBox.warning(self, "Error", result.get("error", "Failed to download PDF"))
     
     def handle_logout(self):
-        reply = QMessageBox.question(
-            self,
-            "Logout",
-            "Are you sure you want to logout?",
-            QMessageBox.Yes | QMessageBox.No
-        )
+        dialog = LogoutConfirmDialog(self)
         
-        if reply == QMessageBox.Yes:
+        if dialog.exec_() == QDialog.Accepted:
             api.logout()
             self.close()
             show_login()

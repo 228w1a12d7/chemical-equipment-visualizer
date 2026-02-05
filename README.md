@@ -40,10 +40,15 @@ python manage.py runserver
 - **CSV Upload**: Upload equipment data files with drag-and-drop support (Web) or file picker (Desktop)
 - **Data Summary API**: View total count, averages, and equipment type distribution
 - **Interactive Visualizations**: Charts using Chart.js (Web) and Matplotlib (Desktop)
+  - Pie chart for equipment type distribution
+  - Bar chart for average parameters by type
+  - Line chart for equipment parameters overview
 - **History Management**: Store and access the last 5 uploaded datasets
 - **PDF Reports**: Generate downloadable PDF reports with summaries and data tables
 - **Authentication**: User registration and login with token-based authentication
+- **Logout Confirmation**: Modal dialog to confirm logout action
 - **Dual Frontend**: Both Web (React) and Desktop (PyQt5) interfaces
+- **Responsive Design**: Modern UI with smooth animations
 
 ---
 
@@ -279,6 +284,18 @@ vercel --prod
 
 **Kundana Sree**
 - Gmail: [kundanasree3989@gmail.com](kundanasree3989@gmail.com)
+
+---
+
+## 🔄 Recent Updates
+
+- **Enhanced Desktop Charts**: Larger, more visually impressive charts with shadows, gradients, and value labels
+- **Scrollable Chart View**: Desktop app charts are now scrollable for better visibility
+- **Logout Confirmation Modal**: Both Web and Desktop apps now show a confirmation dialog before logging out
+- **Improved Error Handling**: Better login error messages (distinguishes "user not found" vs "wrong password")
+- **Fixed Data Display**: Corrected field name mapping for equipment data table
+
+---
 
 ## 📞 Support
 

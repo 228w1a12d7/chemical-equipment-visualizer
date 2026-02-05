@@ -284,17 +284,6 @@ vercel --prod
 
 **Kundana Sree**
 - Gmail: [kundanasree3989@gmail.com](kundanasree3989@gmail.com)
-
----
-
-## 🔄 Recent Updates
-
-- **Enhanced Desktop Charts**: Larger, more visually impressive charts with shadows, gradients, and value labels
-- **Scrollable Chart View**: Desktop app charts are now scrollable for better visibility
-- **Logout Confirmation Modal**: Both Web and Desktop apps now show a confirmation dialog before logging out
-- **Improved Error Handling**: Better login error messages (distinguishes "user not found" vs "wrong password")
-- **Fixed Data Display**: Corrected field name mapping for equipment data table
-
 ---
 
 ## 📞 Support

@@ -16,7 +16,7 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 | **Web Frontend** | [https://frontend-web-nu-blue.vercel.app](https://frontend-web-nu-blue.vercel.app) | ✅ Live |
 | **API Backend** | [https://chemical-equipment-api-production.up.railway.app](https://chemical-equipment-api-production.up.railway.app) | ✅ Live |
 
-### Test Credentials
+### Backend Test Credentials
 - **Username:** `admin`
 - **Password:** `admin123`
 

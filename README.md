@@ -14,24 +14,13 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 | Component | URL | Status |
 |-----------|-----|--------|
 | **Web Frontend** | [https://frontend-web-nu-blue.vercel.app](https://frontend-web-nu-blue.vercel.app) | ✅ Live |
-| **API Backend** | Run locally (see instructions below) | 📝 Local |
+| **API Backend** | [https://chemical-equipment-api-production.up.railway.app](https://chemical-equipment-api-production.up.railway.app) | ✅ Live |
 
-> **Note:** The frontend is deployed on Vercel. To fully test the application, you need to run the backend locally or deploy it to your own server.
+### Test Credentials
+- **Username:** `admin`
+- **Password:** `admin123`
 
-### Quick Test (Local Backend + Live Frontend)
-
-```bash
-# 1. Clone and start backend locally
-git clone https://github.com/228w1a12d7/chemical-equipment-visualizer.git
-cd chemical-equipment-visualizer/backend
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-
-# 2. Open the live frontend in browser
-# Visit: https://frontend-web-nu-blue.vercel.app
-# (Configure it to use http://localhost:8000/api)
-```
+> **Both frontend and backend are fully deployed and connected!** You can test the complete application at the Web Frontend URL above.
 
 ---
 

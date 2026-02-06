@@ -282,7 +282,7 @@ vercel --prod
 ---
 ## 👨‍💻 Author
 
-**Kundana Sree**
+**Kundana Sree Bavisetti**
 - Gmail: [kundanasree3989@gmail.com](kundanasree3989@gmail.com)
 ---
 

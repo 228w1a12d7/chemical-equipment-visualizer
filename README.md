@@ -47,16 +47,12 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 - **Date Range Selection**: Filter equipment data by date range to see historical trends
 - **Real-time Filtering**: Apply date filters to view specific time periods
 
-### CRUD Operations
-- **Add Equipment**: Add new equipment records directly from the UI
-- **Edit Equipment**: Inline editing of equipment parameters (name, type, flowrate, pressure, temperature)
-- **Delete Equipment**: Remove individual equipment records with confirmation
-- **Auto-recalculation**: Statistics automatically update after any CRUD operation
 
-### Dark Mode
-- **Theme Toggle**: Switch between light and dark themes
-- **Persistent Preference**: Theme choice is saved to localStorage
-- **Full UI Support**: All components support both themes
+### CSV Export & Date Filtering
+- **CSV Export**: Download equipment data as CSV file for further analysis (Web & Desktop)
+- **Date Range Selection**: Filter equipment data by date range to see historical trends (Web & Desktop)
+
+> **Note:** CRUD operations (Add/Edit/Delete) and dark mode features have been removed for demo purposes. The app now focuses on data upload, visualization, CSV export, and date filtering.
 
 ---
 

@@ -990,17 +990,29 @@ class MainWindow(QMainWindow):
         return widget
     
     def browse_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Select CSV File",
-            "",
-            "CSV Files (*.csv);;All Files (*)"
-        )
-        
-        if file_path:
-            self.selected_file = file_path
-            self.file_label.setText(os.path.basename(file_path))
-            self.upload_btn.setEnabled(True)
+        """Open file dialog to select CSV file."""
+        try:
+            # Use native dialog for better macOS compatibility
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontUseNativeDialog  # Try non-native dialog
+            
+            file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select CSV File",
+                os.path.expanduser("~"),  # Start from home directory
+                "CSV Files (*.csv);;All Files (*)",
+                options=options
+            )
+            
+            if file_path:
+                self.selected_file = file_path
+                filename = os.path.basename(file_path)
+                self.file_label.setText(f"📄 {filename}")
+                self.file_label.setStyleSheet(f"color: {COLORS['success']}; font-size: 14px; font-weight: bold; background: transparent;")
+                self.upload_btn.setEnabled(True)
+                self.upload_btn.setText("⬆️ Upload")
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to open file dialog: {str(e)}")
     
     def upload_file(self):
         if not hasattr(self, 'selected_file'):

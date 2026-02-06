@@ -15,6 +15,7 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 |-----------|-----|--------|
 | **Web Frontend** | [https://frontend-web-nu-blue.vercel.app](https://frontend-web-nu-blue.vercel.app) | ✅ Live |
 | **API Backend** | [https://chemical-equipment-api-production.up.railway.app](https://chemical-equipment-api-production.up.railway.app) | ✅ Live |
+| **Admin Panel** | [https://chemical-equipment-api-production.up.railway.app/admin/](https://chemical-equipment-api-production.up.railway.app/admin/) | ✅ Live |
 
 ### Backend Test Credentials
 - **Username:** `admin`
@@ -204,10 +205,10 @@ cd frontend-web && npm install && npm start
 # Open browser: http://localhost:3000
 ```
 
-**Option B: Use Live Frontend with Local Backend**
-1. Start backend locally (see above)
-2. Visit: https://frontend-web-nu-blue.vercel.app
-3. The frontend will connect to `localhost:8000` by default
+**Option B: Use Live Deployment (No Setup Required)**
+1. Visit: https://frontend-web-nu-blue.vercel.app
+2. The frontend is already connected to the Railway backend
+3. Login with test credentials: `admin` / `admin123`
 
 **Test Flow:**
 1. Register a new account
@@ -246,21 +247,22 @@ chemical-equipment-visualizer/
 
 ## 🚀 Deployment
 
-### Deploy Backend to Render (Free)
+### Backend Deployed to Railway (Free)
 
-1. Go to [render.com](https://render.com) → Sign up with GitHub
-2. Click **"New +"** → **"Web Service"**
+The backend is deployed on [Railway](https://railway.app):
+
+1. Go to [railway.app](https://railway.app) → Sign up with GitHub
+2. Click **"New Project"** → **"Deploy from GitHub repo"**
 3. Select repository: `chemical-equipment-visualizer`
 4. Configure:
    - **Root Directory**: `backend`
-   - **Build Command**: `pip install -r requirements.txt && python manage.py migrate`
-   - **Start Command**: `gunicorn chemical_visualizer.wsgi:application`
-5. Add environment variables:
-   - `DJANGO_SECRET_KEY`: (generate a random key)
-   - `CORS_ALLOW_ALL`: `true`
-6. Deploy!
+   - Railway auto-detects Django and configures the build
+5. The Dockerfile handles migrations and superuser creation automatically
+6. Live URL: https://chemical-equipment-api-production.up.railway.app
 
-### Deploy Frontend to Vercel (Free)
+### Frontend Deployed to Vercel (Free)
+
+The frontend is deployed on [Vercel](https://vercel.com):
 
 ```bash
 cd frontend-web
@@ -268,13 +270,18 @@ npm install -g vercel
 vercel --prod
 ```
 
+**Important:** Set environment variable in Vercel dashboard:
+- `REACT_APP_API_URL` = `https://chemical-equipment-api-production.up.railway.app/api`
+
 ---
 ## 👨‍💻 Author
 
 **Kundana Sree Bavisetti**
-- Gmail: [kundanasree3989@gmail.com](kundanasree3989@gmail.com)
+- Email: kundanasree3989@gmail.com
+- GitHub: [@228w1a12d7](https://github.com/228w1a12d7)
+
 ---
 
 ## 📞 Support
 
-For questions or issues, [open an issue](kundanasree3989@gmail.com) on GitHub.
+For questions or issues, please [open an issue](https://github.com/228w1a12d7/chemical-equipment-visualizer/issues) on GitHub.

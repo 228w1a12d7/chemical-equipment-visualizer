@@ -3,14 +3,22 @@ API Service for Chemical Equipment Visualizer Desktop App
 Handles all communication with the Django REST API backend
 """
 
+import os
 import requests
 from typing import Optional, Dict, Any, List
+
+
+# Production backend URL - same as web app uses
+DEFAULT_API_URL = os.environ.get(
+    "CHEMICAL_API_URL", 
+    "https://chemical-equipment-api-production.up.railway.app/api"
+)
 
 
 class APIService:
     """Service class for API communication with the backend."""
     
-    def __init__(self, base_url: str = "http://localhost:8000/api"):
+    def __init__(self, base_url: str = DEFAULT_API_URL):
         self.base_url = base_url
         self.token: Optional[str] = None
         self.session = requests.Session()

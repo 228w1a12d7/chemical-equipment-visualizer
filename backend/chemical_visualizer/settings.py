@@ -12,7 +12,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-produc
 
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['*', '.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*', '.onrender.com', '.railway.app', 'localhost', '127.0.0.1']
+
+# CSRF trusted origins for production (required for admin panel)
+CSRF_TRUSTED_ORIGINS = [
+    'https://chemical-equipment-api-production.up.railway.app',
+    'https://*.railway.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',

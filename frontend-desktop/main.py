@@ -56,6 +56,66 @@ CHART_COLORS = [
 ]
 
 
+def show_styled_message(parent, title, message, msg_type="info"):
+    """Show a styled message dialog with visible fonts."""
+    dialog = QDialog(parent)
+    dialog.setWindowTitle(title)
+    dialog.setFixedSize(400, 180)
+    dialog.setStyleSheet(f"""
+        QDialog {{
+            background-color: white;
+        }}
+        QLabel {{
+            color: #1e293b;
+            font-size: 14px;
+        }}
+        QPushButton {{
+            background-color: {COLORS['primary']};
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 30px;
+            font-size: 14px;
+            font-weight: bold;
+        }}
+        QPushButton:hover {{
+            background-color: {COLORS['secondary']};
+        }}
+    """)
+    
+    layout = QVBoxLayout(dialog)
+    layout.setSpacing(20)
+    layout.setContentsMargins(30, 30, 30, 30)
+    
+    # Icon and message
+    icon_text = "✓" if msg_type == "info" else "⚠"
+    icon_color = COLORS['success'] if msg_type == "info" else COLORS['warning']
+    
+    icon_label = QLabel(icon_text)
+    icon_label.setStyleSheet(f"font-size: 36px; color: {icon_color};")
+    icon_label.setAlignment(Qt.AlignCenter)
+    layout.addWidget(icon_label)
+    
+    msg_label = QLabel(message)
+    msg_label.setStyleSheet("font-size: 15px; color: #1e293b; font-weight: 500;")
+    msg_label.setAlignment(Qt.AlignCenter)
+    msg_label.setWordWrap(True)
+    layout.addWidget(msg_label)
+    
+    # OK button
+    ok_btn = QPushButton("OK")
+    ok_btn.setFixedWidth(100)
+    ok_btn.clicked.connect(dialog.accept)
+    
+    btn_layout = QHBoxLayout()
+    btn_layout.addStretch()
+    btn_layout.addWidget(ok_btn)
+    btn_layout.addStretch()
+    layout.addLayout(btn_layout)
+    
+    dialog.exec_()
+
+
 class WorkerThread(QThread):
     """Thread for background API calls."""
     finished = pyqtSignal(dict)
@@ -600,7 +660,7 @@ class MainWindow(QMainWindow):
         browse_btn.clicked.connect(self.browse_file)
         btn_layout.addWidget(browse_btn)
         
-        self.upload_btn = QPushButton("⬆️ Upload")
+        self.upload_btn = QPushButton("Upload")
         self.upload_btn.setMinimumSize(180, 52)
         self.upload_btn.setEnabled(False)
         self.upload_btn.setCursor(Qt.PointingHandCursor)
@@ -611,7 +671,7 @@ class MainWindow(QMainWindow):
                 border: none;
                 border-radius: 10px;
                 font-weight: bold;
-                font-size: 15px;
+                font-size: 16px;
                 padding: 12px 24px;
             }}
             QPushButton:hover {{
@@ -622,7 +682,7 @@ class MainWindow(QMainWindow):
             }}
             QPushButton:disabled {{
                 background-color: #d1d5db;
-                color: #9ca3af;
+                color: #6b7280;
             }}
         """)
         self.upload_btn.clicked.connect(self.upload_file)
@@ -990,23 +1050,34 @@ class MainWindow(QMainWindow):
         return widget
     
     def browse_file(self):
-        """Open file dialog to select CSV file."""
+        """Open file dialog to select CSV file using native macOS picker."""
         try:
-            # Use native macOS dialog for best compatibility
-            file_path, _ = QFileDialog.getOpenFileName(
-                self,
-                "Select CSV File",
-                os.path.expanduser("~"),  # Start from home directory
-                "CSV Files (*.csv);;All Files (*)"
+            import subprocess
+            
+            # Use native macOS file picker via AppleScript - guaranteed to work
+            script = '''
+            tell application "System Events"
+                activate
+            end tell
+            set theFile to choose file with prompt "Select a CSV file" of type {"csv", "CSV", "public.comma-separated-values-text"} default location (path to home folder)
+            return POSIX path of theFile
+            '''
+            
+            result = subprocess.run(
+                ['osascript', '-e', script],
+                capture_output=True,
+                text=True
             )
             
-            if file_path:
+            if result.returncode == 0 and result.stdout.strip():
+                file_path = result.stdout.strip()
                 self.selected_file = file_path
                 filename = os.path.basename(file_path)
-                self.file_label.setText(f"📄 {filename}")
+                self.file_label.setText(filename)
                 self.file_label.setStyleSheet(f"color: {COLORS['success']}; font-size: 14px; font-weight: bold; background: transparent;")
                 self.upload_btn.setEnabled(True)
-                self.upload_btn.setText("⬆️ Upload")
+                self.upload_btn.setText("Upload")
+            # User cancelled - do nothing
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Failed to open file dialog: {str(e)}")
     
@@ -1029,9 +1100,9 @@ class MainWindow(QMainWindow):
             self.update_charts()
             self.load_history()
             self.tabs.setCurrentIndex(1)  # Switch to data tab
-            QMessageBox.information(self, "Success", "File uploaded successfully!")
+            show_styled_message(self, "Success", "File uploaded successfully!", "info")
         else:
-            QMessageBox.warning(self, "Upload Failed", result.get("error", "Upload failed"))
+            show_styled_message(self, "Upload Failed", result.get("error", "Upload failed"), "warning")
     
     def update_data_display(self):
         if not self.current_data:

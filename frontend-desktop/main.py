@@ -12,10 +12,9 @@ from PyQt5.QtWidgets import (
     QLabel, QLineEdit, QPushButton, QTabWidget, QTableWidget,
     QTableWidgetItem, QFileDialog, QMessageBox, QDialog,
     QFormLayout, QListWidget, QListWidgetItem, QGroupBox,
-    QSplitter, QFrame, QHeaderView, QSizePolicy, QScrollArea,
-    QDateEdit, QComboBox, QSpinBox, QDoubleSpinBox
+    QSplitter, QFrame, QHeaderView, QSizePolicy, QScrollArea
 )
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QDate
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QColor, QPalette
 
 import matplotlib
@@ -27,8 +26,8 @@ import matplotlib.pyplot as plt
 from api_service import api
 
 
-# Color schemes for light and dark mode
-LIGHT_COLORS = {
+# Color scheme
+COLORS = {
     'primary': '#4f46e5',
     'secondary': '#6366f1',
     'success': '#10b981',
@@ -38,30 +37,7 @@ LIGHT_COLORS = {
     'card': '#ffffff',
     'text': '#1e293b',
     'text_secondary': '#64748b',
-    'sidebar': '#1e293b',
-    'table_header': '#4f46e5',
-    'table_alt': '#f8fafc',
-    'border': '#e2e8f0',
 }
-
-DARK_COLORS = {
-    'primary': '#818cf8',
-    'secondary': '#6366f1',
-    'success': '#34d399',
-    'danger': '#f87171',
-    'warning': '#fbbf24',
-    'background': '#0f172a',
-    'card': '#1e293b',
-    'text': '#f1f5f9',
-    'text_secondary': '#94a3b8',
-    'sidebar': '#020617',
-    'table_header': '#4f46e5',
-    'table_alt': '#334155',
-    'border': '#334155',
-}
-
-# Default to light mode
-COLORS = LIGHT_COLORS.copy()
 
 # Vibrant colors for impressive charts
 CHART_COLORS = [
@@ -477,9 +453,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.current_data = None
         self.selected_dataset_id = None
-        self.dark_mode = False
-        self.date_filter_start = None
-        self.date_filter_end = None
         self.setup_ui()
         self.load_history()
     
@@ -550,11 +523,10 @@ class MainWindow(QMainWindow):
         sidebar.setFixedWidth(180)
         sidebar.setStyleSheet(f"""
             QFrame {{
-                background-color: {COLORS['sidebar']};
+                background-color: {COLORS['text']};
                 color: white;
             }}
         """)
-        sidebar.setObjectName("sidebar")
         
         layout = QVBoxLayout(sidebar)
         layout.setContentsMargins(20, 30, 20, 30)
@@ -567,23 +539,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(brand)
         
         layout.addStretch()
-        
-        # Dark mode toggle
-        self.dark_mode_btn = QPushButton("🌙 Dark Mode")
-        self.dark_mode_btn.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                color: white;
-                border: 1px solid white;
-                border-radius: 6px;
-                padding: 10px;
-            }
-            QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.1);
-            }
-        """)
-        self.dark_mode_btn.clicked.connect(self.toggle_dark_mode)
-        layout.addWidget(self.dark_mode_btn)
         
         # Logout button
         logout_btn = QPushButton("🚪 Logout")
@@ -775,101 +730,12 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(self.stats_widget)
         
-        # Date filter section
-        filter_frame = QFrame()
-        filter_frame.setStyleSheet(f"""
-            QFrame {{
-                background-color: {COLORS['card']};
-                border-radius: 8px;
-                padding: 10px;
-                border: 1px solid {COLORS['border']};
-            }}
-        """)
-        filter_layout = QHBoxLayout(filter_frame)
-        filter_layout.setContentsMargins(15, 10, 15, 10)
-        
-        filter_label = QLabel("📅 Date Filter:")
-        filter_label.setStyleSheet(f"color: {COLORS['text']}; font-weight: bold;")
-        filter_layout.addWidget(filter_label)
-        
-        start_label = QLabel("Start:")
-        start_label.setStyleSheet(f"color: {COLORS['text_secondary']};")
-        filter_layout.addWidget(start_label)
-        
-        self.start_date_edit = QDateEdit()
-        self.start_date_edit.setCalendarPopup(True)
-        self.start_date_edit.setDate(QDate.currentDate().addMonths(-1))
-        self.start_date_edit.setStyleSheet(f"""
-            QDateEdit {{
-                padding: 8px;
-                border: 1px solid {COLORS['border']};
-                border-radius: 6px;
-                background: {COLORS['card']};
-                color: {COLORS['text']};
-            }}
-        """)
-        filter_layout.addWidget(self.start_date_edit)
-        
-        end_label = QLabel("End:")
-        end_label.setStyleSheet(f"color: {COLORS['text_secondary']};")
-        filter_layout.addWidget(end_label)
-        
-        self.end_date_edit = QDateEdit()
-        self.end_date_edit.setCalendarPopup(True)
-        self.end_date_edit.setDate(QDate.currentDate())
-        self.end_date_edit.setStyleSheet(f"""
-            QDateEdit {{
-                padding: 8px;
-                border: 1px solid {COLORS['border']};
-                border-radius: 6px;
-                background: {COLORS['card']};
-                color: {COLORS['text']};
-            }}
-        """)
-        filter_layout.addWidget(self.end_date_edit)
-        
-        self.filter_btn = QPushButton("🔍 Apply Filter")
-        self.filter_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['primary']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: {COLORS['secondary']};
-            }}
-        """)
-        self.filter_btn.clicked.connect(self.apply_date_filter)
-        filter_layout.addWidget(self.filter_btn)
-        
-        self.clear_filter_btn = QPushButton("✖ Clear")
-        self.clear_filter_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['text_secondary']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-            }}
-            QPushButton:hover {{
-                background-color: #4a5568;
-            }}
-        """)
-        self.clear_filter_btn.clicked.connect(self.clear_date_filter)
-        filter_layout.addWidget(self.clear_filter_btn)
-        
-        filter_layout.addStretch()
-        layout.addWidget(filter_frame)
-        
-        # Actions row with PDF, CSV, and Add Equipment
+        # Actions
         actions_layout = QHBoxLayout()
         actions_layout.setContentsMargins(0, 10, 0, 10)
         
         self.pdf_btn = QPushButton("📄 Download PDF Report")
-        self.pdf_btn.setMinimumSize(200, 45)
+        self.pdf_btn.setMinimumSize(220, 48)
         self.pdf_btn.setEnabled(False)
         self.pdf_btn.setStyleSheet(f"""
             QPushButton {{
@@ -878,8 +744,8 @@ class MainWindow(QMainWindow):
                 border: none;
                 border-radius: 8px;
                 font-weight: bold;
-                font-size: 13px;
-                padding: 10px 20px;
+                font-size: 14px;
+                padding: 12px 24px;
             }}
             QPushButton:hover {{
                 background-color: #059669;
@@ -890,52 +756,6 @@ class MainWindow(QMainWindow):
         """)
         self.pdf_btn.clicked.connect(self.download_pdf)
         actions_layout.addWidget(self.pdf_btn)
-        
-        self.csv_btn = QPushButton("📊 Export as CSV")
-        self.csv_btn.setMinimumSize(160, 45)
-        self.csv_btn.setEnabled(False)
-        self.csv_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['primary']};
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 13px;
-                padding: 10px 20px;
-            }}
-            QPushButton:hover {{
-                background-color: {COLORS['secondary']};
-            }}
-            QPushButton:disabled {{
-                background-color: #d1d5db;
-            }}
-        """)
-        self.csv_btn.clicked.connect(self.download_csv)
-        actions_layout.addWidget(self.csv_btn)
-        
-        self.add_equipment_btn = QPushButton("➕ Add Equipment")
-        self.add_equipment_btn.setMinimumSize(160, 45)
-        self.add_equipment_btn.setEnabled(False)
-        self.add_equipment_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['warning']};
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-weight: bold;
-                font-size: 13px;
-                padding: 10px 20px;
-            }}
-            QPushButton:hover {{
-                background-color: #d97706;
-            }}
-            QPushButton:disabled {{
-                background-color: #d1d5db;
-            }}
-        """)
-        self.add_equipment_btn.clicked.connect(self.show_add_equipment_dialog)
-        actions_layout.addWidget(self.add_equipment_btn)
         
         actions_layout.addStretch()
         layout.addLayout(actions_layout)
@@ -1305,86 +1125,43 @@ class MainWindow(QMainWindow):
             f"{summary.get('avg_temperature', 0):.2f}"
         )
         
-        # Update table - without # column, with Edit/Delete actions
+        # Update table
         if equipment_list:
-            columns = ["id", "name", "type", "flowrate", "pressure", "temperature"]
-            column_headers = ["ID", "Equipment Name", "Type", "Flowrate", "Pressure", "Temperature", "Actions"]
+            columns = ["id", "name", "type", 
+                      "flowrate", "pressure", "temperature"]
+            column_headers = ["#", "ID", "Equipment Name", "Type", "Flowrate", "Pressure", "Temperature"]
             self.data_table.setColumnCount(len(column_headers))
             self.data_table.setHorizontalHeaderLabels(column_headers)
             self.data_table.setRowCount(len(equipment_list))
             
-            # Set column widths
+            # Set column widths - make all columns properly visible
             self.data_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(0, 70)  # ID column
-            self.data_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)  # Name
-            self.data_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)  # Type
-            self.data_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(3, 90)  # Flowrate
+            self.data_table.setColumnWidth(0, 45)  # # column
+            self.data_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
+            self.data_table.setColumnWidth(1, 70)  # ID column - wider for full ID
+            self.data_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)  # Name
+            self.data_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)  # Type
             self.data_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(4, 90)  # Pressure
+            self.data_table.setColumnWidth(4, 90)  # Flowrate
             self.data_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(5, 100)  # Temperature
+            self.data_table.setColumnWidth(5, 90)  # Pressure
             self.data_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(6, 140)  # Actions
+            self.data_table.setColumnWidth(6, 100)  # Temperature - full word
             
             for row, item in enumerate(equipment_list):
-                equipment_id = item.get("id")
+                # S.No. column
+                sno_item = QTableWidgetItem(str(row + 1))
+                sno_item.setTextAlignment(Qt.AlignCenter)
+                self.data_table.setItem(row, 0, sno_item)
                 
                 # Data columns
                 for col, key in enumerate(columns):
                     value = item.get(key, "")
                     table_item = QTableWidgetItem(str(value))
                     table_item.setTextAlignment(Qt.AlignCenter)
-                    self.data_table.setItem(row, col, table_item)
-                
-                # Actions column with Edit and Delete buttons
-                actions_widget = QWidget()
-                actions_layout = QHBoxLayout(actions_widget)
-                actions_layout.setContentsMargins(5, 2, 5, 2)
-                actions_layout.setSpacing(5)
-                
-                edit_btn = QPushButton("✏️")
-                edit_btn.setFixedSize(35, 30)
-                edit_btn.setToolTip("Edit Equipment")
-                edit_btn.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: {COLORS['warning']};
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        font-size: 14px;
-                    }}
-                    QPushButton:hover {{
-                        background-color: #d97706;
-                    }}
-                """)
-                edit_btn.clicked.connect(lambda checked, eid=equipment_id, data=item: self.edit_equipment(eid, data))
-                actions_layout.addWidget(edit_btn)
-                
-                delete_btn = QPushButton("🗑️")
-                delete_btn.setFixedSize(35, 30)
-                delete_btn.setToolTip("Delete Equipment")
-                delete_btn.setStyleSheet(f"""
-                    QPushButton {{
-                        background-color: {COLORS['danger']};
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        font-size: 14px;
-                    }}
-                    QPushButton:hover {{
-                        background-color: #dc2626;
-                    }}
-                """)
-                delete_btn.clicked.connect(lambda checked, eid=equipment_id: self.delete_equipment(eid))
-                actions_layout.addWidget(delete_btn)
-                
-                actions_layout.addStretch()
-                self.data_table.setCellWidget(row, 6, actions_widget)
+                    self.data_table.setItem(row, col + 1, table_item)
         
         self.pdf_btn.setEnabled(True)
-        self.csv_btn.setEnabled(True)
-        self.add_equipment_btn.setEnabled(True)
     
     def update_charts(self):
         if not self.current_data:
@@ -1585,321 +1362,6 @@ class MainWindow(QMainWindow):
                 QMessageBox.information(self, "Success", f"PDF saved to {save_path}")
             else:
                 QMessageBox.warning(self, "Error", result.get("error", "Failed to download PDF"))
-    
-    def download_csv(self):
-        """Download equipment data as CSV."""
-        if not self.selected_dataset_id:
-            QMessageBox.warning(self, "Error", "Please select a dataset first")
-            return
-        
-        save_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save CSV Export",
-            f"equipment_data_{self.selected_dataset_id}.csv",
-            "CSV Files (*.csv)"
-        )
-        
-        if save_path:
-            result = api.download_csv(self.selected_dataset_id, save_path)
-            
-            if result["success"]:
-                QMessageBox.information(self, "Success", f"CSV saved to {save_path}")
-            else:
-                QMessageBox.warning(self, "Error", result.get("error", "Failed to export CSV"))
-    
-    def apply_date_filter(self):
-        """Apply date filter to equipment list."""
-        if not self.selected_dataset_id:
-            QMessageBox.warning(self, "Error", "Please select a dataset first")
-            return
-        
-        start_date = self.start_date_edit.date().toString("yyyy-MM-dd")
-        end_date = self.end_date_edit.date().toString("yyyy-MM-dd")
-        
-        result = api.get_equipment_list(self.selected_dataset_id, start_date, end_date)
-        
-        if result["success"]:
-            # Update the equipment list in current_data
-            self.current_data["equipment_list"] = result["data"].get("equipment_list", [])
-            self.current_data["summary"] = result["data"].get("summary", self.current_data.get("summary", {}))
-            self.update_data_display()
-            show_styled_message(self, "Filter Applied", f"Showing data from {start_date} to {end_date}", "info")
-        else:
-            QMessageBox.warning(self, "Error", result.get("error", "Failed to filter data"))
-    
-    def clear_date_filter(self):
-        """Clear date filter and reload full dataset."""
-        if not self.selected_dataset_id:
-            return
-        
-        result = api.get_dataset(self.selected_dataset_id)
-        
-        if result["success"]:
-            self.current_data = result["data"]
-            self.update_data_display()
-            show_styled_message(self, "Filter Cleared", "Showing all equipment data", "info")
-    
-    def toggle_dark_mode(self):
-        """Toggle between light and dark mode."""
-        global COLORS
-        self.dark_mode = not self.dark_mode
-        
-        if self.dark_mode:
-            COLORS = DARK_COLORS.copy()
-            self.dark_mode_btn.setText("☀️ Light Mode")
-        else:
-            COLORS = LIGHT_COLORS.copy()
-            self.dark_mode_btn.setText("🌙 Dark Mode")
-        
-        # Update main window style
-        self.setStyleSheet(f"background-color: {COLORS['background']};")
-        
-        # Refresh the UI
-        self.update_data_display()
-        show_styled_message(self, "Theme Changed", 
-                           "Dark mode enabled" if self.dark_mode else "Light mode enabled", "info")
-    
-    def show_add_equipment_dialog(self):
-        """Show dialog to add new equipment."""
-        if not self.selected_dataset_id:
-            QMessageBox.warning(self, "Error", "Please select a dataset first")
-            return
-        
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Add New Equipment")
-        dialog.setFixedSize(400, 350)
-        dialog.setStyleSheet(f"""
-            QDialog {{ background-color: {COLORS['card']}; }}
-            QLabel {{ color: {COLORS['text']}; font-size: 13px; }}
-            QLineEdit, QDoubleSpinBox {{
-                padding: 10px;
-                border: 1px solid {COLORS['border']};
-                border-radius: 6px;
-                background: {COLORS['card']};
-                color: {COLORS['text']};
-            }}
-        """)
-        
-        layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(15)
-        
-        title = QLabel("➕ Add New Equipment")
-        title.setFont(QFont("Arial", 16, QFont.Bold))
-        title.setStyleSheet(f"color: {COLORS['primary']};")
-        layout.addWidget(title)
-        
-        form = QFormLayout()
-        form.setSpacing(12)
-        
-        name_input = QLineEdit()
-        name_input.setPlaceholderText("e.g., Pump-5")
-        form.addRow("Name:", name_input)
-        
-        type_input = QLineEdit()
-        type_input.setPlaceholderText("e.g., Pump, Valve, Compressor")
-        form.addRow("Type:", type_input)
-        
-        flowrate_input = QDoubleSpinBox()
-        flowrate_input.setRange(0, 10000)
-        flowrate_input.setDecimals(2)
-        form.addRow("Flowrate:", flowrate_input)
-        
-        pressure_input = QDoubleSpinBox()
-        pressure_input.setRange(0, 1000)
-        pressure_input.setDecimals(2)
-        form.addRow("Pressure:", pressure_input)
-        
-        temperature_input = QDoubleSpinBox()
-        temperature_input.setRange(-100, 1000)
-        temperature_input.setDecimals(2)
-        form.addRow("Temperature:", temperature_input)
-        
-        layout.addLayout(form)
-        
-        # Buttons
-        btn_layout = QHBoxLayout()
-        
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['text_secondary']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 25px;
-            }}
-        """)
-        cancel_btn.clicked.connect(dialog.reject)
-        btn_layout.addWidget(cancel_btn)
-        
-        add_btn = QPushButton("Add Equipment")
-        add_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['success']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 25px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{ background-color: #059669; }}
-        """)
-        
-        def submit():
-            if not name_input.text() or not type_input.text():
-                QMessageBox.warning(dialog, "Error", "Name and Type are required")
-                return
-            
-            equipment_data = {
-                "name": name_input.text(),
-                "type": type_input.text(),
-                "flowrate": flowrate_input.value(),
-                "pressure": pressure_input.value(),
-                "temperature": temperature_input.value()
-            }
-            
-            result = api.add_equipment(self.selected_dataset_id, equipment_data)
-            
-            if result["success"]:
-                dialog.accept()
-                # Reload the dataset
-                self.clear_date_filter()
-                show_styled_message(self, "Success", "Equipment added successfully!", "info")
-            else:
-                QMessageBox.warning(dialog, "Error", result.get("error", "Failed to add equipment"))
-        
-        add_btn.clicked.connect(submit)
-        btn_layout.addWidget(add_btn)
-        
-        layout.addLayout(btn_layout)
-        dialog.exec_()
-    
-    def edit_equipment(self, equipment_id, current_data):
-        """Show dialog to edit equipment."""
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Edit Equipment")
-        dialog.setFixedSize(400, 350)
-        dialog.setStyleSheet(f"""
-            QDialog {{ background-color: {COLORS['card']}; }}
-            QLabel {{ color: {COLORS['text']}; font-size: 13px; }}
-            QLineEdit, QDoubleSpinBox {{
-                padding: 10px;
-                border: 1px solid {COLORS['border']};
-                border-radius: 6px;
-                background: {COLORS['card']};
-                color: {COLORS['text']};
-            }}
-        """)
-        
-        layout = QVBoxLayout(dialog)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(15)
-        
-        title = QLabel("✏️ Edit Equipment")
-        title.setFont(QFont("Arial", 16, QFont.Bold))
-        title.setStyleSheet(f"color: {COLORS['warning']};")
-        layout.addWidget(title)
-        
-        form = QFormLayout()
-        form.setSpacing(12)
-        
-        name_input = QLineEdit(current_data.get("name", ""))
-        form.addRow("Name:", name_input)
-        
-        type_input = QLineEdit(current_data.get("type", ""))
-        form.addRow("Type:", type_input)
-        
-        flowrate_input = QDoubleSpinBox()
-        flowrate_input.setRange(0, 10000)
-        flowrate_input.setDecimals(2)
-        flowrate_input.setValue(float(current_data.get("flowrate", 0)))
-        form.addRow("Flowrate:", flowrate_input)
-        
-        pressure_input = QDoubleSpinBox()
-        pressure_input.setRange(0, 1000)
-        pressure_input.setDecimals(2)
-        pressure_input.setValue(float(current_data.get("pressure", 0)))
-        form.addRow("Pressure:", pressure_input)
-        
-        temperature_input = QDoubleSpinBox()
-        temperature_input.setRange(-100, 1000)
-        temperature_input.setDecimals(2)
-        temperature_input.setValue(float(current_data.get("temperature", 0)))
-        form.addRow("Temperature:", temperature_input)
-        
-        layout.addLayout(form)
-        
-        # Buttons
-        btn_layout = QHBoxLayout()
-        
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['text_secondary']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 25px;
-            }}
-        """)
-        cancel_btn.clicked.connect(dialog.reject)
-        btn_layout.addWidget(cancel_btn)
-        
-        save_btn = QPushButton("Save Changes")
-        save_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['warning']};
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 25px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{ background-color: #d97706; }}
-        """)
-        
-        def submit():
-            equipment_data = {
-                "name": name_input.text(),
-                "type": type_input.text(),
-                "flowrate": flowrate_input.value(),
-                "pressure": pressure_input.value(),
-                "temperature": temperature_input.value()
-            }
-            
-            result = api.update_equipment(self.selected_dataset_id, equipment_id, equipment_data)
-            
-            if result["success"]:
-                dialog.accept()
-                self.clear_date_filter()
-                show_styled_message(self, "Success", "Equipment updated successfully!", "info")
-            else:
-                QMessageBox.warning(dialog, "Error", result.get("error", "Failed to update equipment"))
-        
-        save_btn.clicked.connect(submit)
-        btn_layout.addWidget(save_btn)
-        
-        layout.addLayout(btn_layout)
-        dialog.exec_()
-    
-    def delete_equipment(self, equipment_id):
-        """Delete equipment after confirmation."""
-        reply = QMessageBox.question(
-            self,
-            "Confirm Delete",
-            f"Are you sure you want to delete equipment #{equipment_id}?",
-            QMessageBox.Yes | QMessageBox.No
-        )
-        
-        if reply == QMessageBox.Yes:
-            result = api.delete_equipment(self.selected_dataset_id, equipment_id)
-            
-            if result["success"]:
-                self.clear_date_filter()
-                show_styled_message(self, "Success", "Equipment deleted successfully!", "info")
-            else:
-                QMessageBox.warning(self, "Error", result.get("error", "Failed to delete equipment"))
     
     def handle_logout(self):
         dialog = LogoutConfirmDialog(self)

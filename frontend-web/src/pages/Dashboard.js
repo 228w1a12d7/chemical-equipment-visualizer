@@ -21,9 +21,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('darkMode') === 'true';
-  });
   
   // Date filtering state
   const [dateFilter, setDateFilter] = useState({
@@ -31,21 +28,10 @@ const Dashboard = () => {
     endDate: '',
   });
   
-  // Add equipment modal state
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newEquipment, setNewEquipment] = useState({
-    name: '',
-    equipment_type: '',
-    flowrate: 0,
-    pressure: 0,
-    temperature: 0,
-  });
+  // Removed unused state: darkMode, showAddModal, newEquipment
 
   // Apply dark mode class to body
-  useEffect(() => {
-    document.body.classList.toggle('dark-mode', darkMode);
-    localStorage.setItem('darkMode', darkMode);
-  }, [darkMode]);
+  // Removed darkMode effect
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -174,48 +160,6 @@ const Dashboard = () => {
     }
   };
 
-  // CRUD Operations
-  const handleEditEquipment = async (equipmentId, updatedData) => {
-    try {
-      await dataAPI.updateEquipment(selectedDataset, equipmentId, updatedData);
-      toast.success('Equipment updated successfully');
-      await refreshDataset();
-    } catch (error) {
-      toast.error('Failed to update equipment');
-    }
-  };
-
-  const handleDeleteEquipment = async (equipmentId) => {
-    if (!window.confirm('Are you sure you want to delete this equipment?')) {
-      return;
-    }
-    
-    try {
-      await dataAPI.deleteEquipment(selectedDataset, equipmentId);
-      toast.success('Equipment deleted successfully');
-      await refreshDataset();
-    } catch (error) {
-      toast.error('Failed to delete equipment');
-    }
-  };
-
-  const handleAddEquipment = async () => {
-    try {
-      await dataAPI.addEquipment(selectedDataset, newEquipment);
-      toast.success('Equipment added successfully');
-      setShowAddModal(false);
-      setNewEquipment({
-        name: '',
-        equipment_type: '',
-        flowrate: 0,
-        pressure: 0,
-        temperature: 0,
-      });
-      await refreshDataset();
-    } catch (error) {
-      toast.error('Failed to add equipment');
-    }
-  };
 
   // Date filtering
   const handleApplyDateFilter = async () => {
@@ -264,12 +208,9 @@ const Dashboard = () => {
     return new Date(dateString).toLocaleString();
   };
 
-  const toggleDarkMode = () => {
-    setDarkMode(prev => !prev);
-  };
 
   return (
-    <div className={`dashboard ${darkMode ? 'dark-mode' : ''}`}>
+    <div className="dashboard"> 
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-brand">
@@ -318,12 +259,6 @@ const Dashboard = () => {
                 <span>📋</span>
                 <span>History</span>
               </a>
-            </li>
-            <li style={{ marginTop: '20px' }}>
-              <button type="button" onClick={toggleDarkMode} className="theme-toggle">
-                <span>{darkMode ? '☀️' : '🌙'}</span>
-                <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-              </button>
             </li>
             <li style={{ marginTop: '10px' }}>
               <button type="button" onClick={handleLogout}>
@@ -439,22 +374,13 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Data Table with CRUD */}
+                {/* Data Table (read-only) */}
                 <div className="card">
                   <div className="card-header">
                     <h3>Equipment List</h3>
-                    <button 
-                      className="btn btn-success btn-sm"
-                      onClick={() => setShowAddModal(true)}
-                    >
-                      + Add Equipment
-                    </button>
                   </div>
                   <DataTable 
-                    data={currentData.equipment_list} 
-                    editable={true}
-                    onEdit={handleEditEquipment}
-                    onDelete={handleDeleteEquipment}
+                    data={currentData.equipment_list}
                   />
                 </div>
               </>
@@ -516,6 +442,8 @@ const Dashboard = () => {
                     key={dataset.id} 
                     className={`history-item ${selectedDataset === dataset.id ? 'active' : ''}`}
                     onClick={() => handleSelectDataset(dataset)}
+                    tabIndex={0}
+                    onKeyPress={e => { if (e.key === 'Enter' || e.key === ' ') handleSelectDataset(dataset); }}
                   >
                     <div className="history-info">
                       <h4>{dataset.filename}</h4>
@@ -563,72 +491,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Add Equipment Modal */}
-      {showAddModal && (
-        <div className="modal-overlay">
-          <div className="modal-content modal-form">
-            <div className="modal-icon">➕</div>
-            <h3>Add New Equipment</h3>
-            <div className="modal-form-fields">
-              <div className="form-group">
-                <label>Equipment Name</label>
-                <input 
-                  type="text" 
-                  value={newEquipment.name}
-                  onChange={(e) => setNewEquipment(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Reactor-006"
-                />
-              </div>
-              <div className="form-group">
-                <label>Type</label>
-                <input 
-                  type="text" 
-                  value={newEquipment.equipment_type}
-                  onChange={(e) => setNewEquipment(prev => ({ ...prev, equipment_type: e.target.value }))}
-                  placeholder="e.g., Reactor"
-                />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Flowrate</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={newEquipment.flowrate}
-                    onChange={(e) => setNewEquipment(prev => ({ ...prev, flowrate: parseFloat(e.target.value) || 0 }))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Pressure</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={newEquipment.pressure}
-                    onChange={(e) => setNewEquipment(prev => ({ ...prev, pressure: parseFloat(e.target.value) || 0 }))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Temperature</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    value={newEquipment.temperature}
-                    onChange={(e) => setNewEquipment(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0 }))}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="modal-buttons">
-              <button className="btn-cancel" onClick={() => setShowAddModal(false)}>
-                Cancel
-              </button>
-              <button className="btn-confirm btn-add" onClick={handleAddEquipment}>
-                Add Equipment
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

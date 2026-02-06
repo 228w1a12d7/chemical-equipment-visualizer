@@ -364,20 +364,20 @@ class LogoutConfirmDialog(QDialog):
         self.setup_ui()
     
     def setup_ui(self):
-        self.setStyleSheet(f"""
-            QDialog {{
+        self.setStyleSheet("""
+            QDialog {
                 background-color: white;
                 border-radius: 12px;
-            }}
-            QLabel {{
+            }
+            QLabel {
                 color: #1e293b;
-            }}
-            QPushButton {{
+            }
+            QPushButton {
                 min-height: 40px;
                 border-radius: 8px;
                 font-weight: bold;
                 font-size: 14px;
-            }}
+            }
         """)
         
         layout = QVBoxLayout(self)
@@ -402,15 +402,15 @@ class LogoutConfirmDialog(QDialog):
         btn_layout.setSpacing(15)
         
         self.cancel_btn = QPushButton("Cancel")
-        self.cancel_btn.setStyleSheet(f"""
-            QPushButton {{
+        self.cancel_btn.setStyleSheet("""
+            QPushButton {
                 background-color: #e5e7eb;
                 color: #374151;
                 border: none;
-            }}
-            QPushButton:hover {{
+            }
+            QPushButton:hover {
                 background-color: #d1d5db;
-            }}
+            }
         """)
         self.cancel_btn.clicked.connect(self.reject)
         btn_layout.addWidget(self.cancel_btn)
@@ -730,10 +730,7 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(self.stats_widget)
         
-        # Actions
-        actions_layout = QHBoxLayout()
-        actions_layout.setContentsMargins(0, 10, 0, 10)
-        
+        # Only PDF and CSV export remain
         self.pdf_btn = QPushButton("📄 Download PDF Report")
         self.pdf_btn.setMinimumSize(220, 48)
         self.pdf_btn.setEnabled(False)
@@ -755,10 +752,7 @@ class MainWindow(QMainWindow):
             }}
         """)
         self.pdf_btn.clicked.connect(self.download_pdf)
-        actions_layout.addWidget(self.pdf_btn)
-        
-        actions_layout.addStretch()
-        layout.addLayout(actions_layout)
+        layout.addWidget(self.pdf_btn)
         
         # Data table
         self.data_table = QTableWidget()
@@ -1000,12 +994,12 @@ class MainWindow(QMainWindow):
         
         # Tips section to fill empty space
         tips_card = QFrame()
-        tips_card.setStyleSheet(f"""
-            QFrame {{
+        tips_card.setStyleSheet("""
+            QFrame {
                 background-color: #f0f9ff;
                 border-radius: 12px;
                 border: 1px solid #bae6fd;
-            }}
+            }
         """)
         tips_layout = QVBoxLayout(tips_card)
         tips_layout.setContentsMargins(20, 15, 20, 15)
@@ -1027,25 +1021,6 @@ class MainWindow(QMainWindow):
         
         layout.addWidget(tips_card)
         
-        # Delete button
-        delete_btn = QPushButton("🗑️ Delete Selected")
-        delete_btn.setMinimumSize(160, 45)
-        delete_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {COLORS['danger']};
-                color: white;
-                border: none;
-                border-radius: 8px;
-                padding: 12px 24px;
-                font-weight: bold;
-                font-size: 14px;
-            }}
-            QPushButton:hover {{
-                background-color: #dc2626;
-            }}
-        """)
-        delete_btn.clicked.connect(self.delete_selected_dataset)
-        layout.addWidget(delete_btn, alignment=Qt.AlignRight)
         
         return widget
     
@@ -1125,36 +1100,30 @@ class MainWindow(QMainWindow):
             f"{summary.get('avg_temperature', 0):.2f}"
         )
         
-        # Update table
+        # Update table (no actions column)
         if equipment_list:
-            columns = ["id", "name", "type", 
-                      "flowrate", "pressure", "temperature"]
+            columns = ["id", "name", "type", "flowrate", "pressure", "temperature"]
             column_headers = ["#", "ID", "Equipment Name", "Type", "Flowrate", "Pressure", "Temperature"]
             self.data_table.setColumnCount(len(column_headers))
             self.data_table.setHorizontalHeaderLabels(column_headers)
             self.data_table.setRowCount(len(equipment_list))
-            
-            # Set column widths - make all columns properly visible
+            # Set column widths
             self.data_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(0, 45)  # # column
+            self.data_table.setColumnWidth(0, 45)
             self.data_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(1, 70)  # ID column - wider for full ID
-            self.data_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)  # Name
-            self.data_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)  # Type
+            self.data_table.setColumnWidth(1, 70)
+            self.data_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+            self.data_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
             self.data_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(4, 90)  # Flowrate
+            self.data_table.setColumnWidth(4, 90)
             self.data_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(5, 90)  # Pressure
+            self.data_table.setColumnWidth(5, 90)
             self.data_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(6, 100)  # Temperature - full word
-            
+            self.data_table.setColumnWidth(6, 100)
             for row, item in enumerate(equipment_list):
-                # S.No. column
                 sno_item = QTableWidgetItem(str(row + 1))
                 sno_item.setTextAlignment(Qt.AlignCenter)
                 self.data_table.setItem(row, 0, sno_item)
-                
-                # Data columns
                 for col, key in enumerate(columns):
                     value = item.get(key, "")
                     table_item = QTableWidgetItem(str(value))
@@ -1179,7 +1148,7 @@ class MainWindow(QMainWindow):
             colors = CHART_COLORS[:len(labels)]
             explode = [0.03] * len(labels)  # Slight explosion for all slices
             
-            wedges, texts, autotexts = self.pie_chart.axes.pie(
+            _, _, autotexts = self.pie_chart.axes.pie(
                 sizes, labels=labels, colors=colors, autopct='%1.1f%%',
                 explode=explode,
                 textprops={'fontsize': 11, 'color': '#1e293b'}, 
@@ -1316,32 +1285,6 @@ class MainWindow(QMainWindow):
         else:
             QMessageBox.warning(self, "Error", "Failed to load dataset")
     
-    def delete_selected_dataset(self):
-        current_item = self.history_list.currentItem()
-        if not current_item:
-            QMessageBox.warning(self, "Error", "Please select a dataset to delete")
-            return
-        
-        dataset = current_item.data(Qt.UserRole)
-        
-        reply = QMessageBox.question(
-            self,
-            "Confirm Delete",
-            f"Are you sure you want to delete '{dataset['filename']}'?",
-            QMessageBox.Yes | QMessageBox.No
-        )
-        
-        if reply == QMessageBox.Yes:
-            result = api.delete_dataset(dataset['id'])
-            
-            if result["success"]:
-                self.load_history()
-                if self.selected_dataset_id == dataset['id']:
-                    self.current_data = None
-                    self.selected_dataset_id = None
-                QMessageBox.information(self, "Success", "Dataset deleted successfully")
-            else:
-                QMessageBox.warning(self, "Error", "Failed to delete dataset")
     
     def download_pdf(self):
         if not self.selected_dataset_id:

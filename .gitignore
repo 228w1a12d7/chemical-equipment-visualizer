@@ -96,3 +96,4 @@ coverage.xml
 
 # Generated PDF reports
 *.pdf
+.vercel

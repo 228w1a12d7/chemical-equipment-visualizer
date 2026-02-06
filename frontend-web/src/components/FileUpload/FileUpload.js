@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 const FileUpload = ({ onUploadSuccess }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleDragOver = (e) => {
@@ -40,6 +41,7 @@ const FileUpload = ({ onUploadSuccess }) => {
       return;
     }
 
+    setSelectedFile(file);
     setUploading(true);
 
     try {
@@ -53,14 +55,18 @@ const FileUpload = ({ onUploadSuccess }) => {
       toast.error(errorMessage);
     } finally {
       setUploading(false);
+      setSelectedFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   };
 
-  const handleClick = () => {
-    fileInputRef.current?.click();
+  const handleBrowseClick = (e) => {
+    e.stopPropagation();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   return (
@@ -69,26 +75,46 @@ const FileUpload = ({ onUploadSuccess }) => {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onClick={handleClick}
     >
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileSelect}
         accept=".csv"
+        style={{ display: 'none' }}
       />
       
       <div className="upload-icon">📁</div>
       
       {uploading ? (
         <>
-          <h4>Uploading...</h4>
+          <h4>Uploading {selectedFile?.name}...</h4>
           <div className="spinner" style={{ margin: '20px auto' }}></div>
         </>
       ) : (
         <>
           <h4>Drag & Drop your CSV file here</h4>
-          <p>or click to browse</p>
+          <p>or</p>
+          <button 
+            type="button"
+            onClick={handleBrowseClick}
+            style={{
+              marginTop: '15px',
+              padding: '12px 32px',
+              backgroundColor: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#5a67d8'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#667eea'}
+          >
+            Browse Files
+          </button>
           <p style={{ marginTop: '15px', fontSize: '12px', color: '#aaa' }}>
             Required columns: Equipment Name, Type, Flowrate, Pressure, Temperature
           </p>

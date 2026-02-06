@@ -534,89 +534,103 @@ class MainWindow(QMainWindow):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        # Upload area
-        upload_box = QGroupBox("📤 Upload CSV File")
-        upload_box.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                font-size: 16px;
-                color: #1e293b;
-                border: 2px dashed #4f46e5;
-                border-radius: 12px;
-                margin-top: 15px;
-                padding-top: 25px;
+        # Upload area container
+        upload_container = QFrame()
+        upload_container.setStyleSheet(f"""
+            QFrame {{
                 background-color: #f8fafc;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 20px;
-                padding: 5px 15px;
-                background-color: white;
-                border-radius: 6px;
-                color: #4f46e5;
-            }
+                border: 2px dashed {COLORS['primary']};
+                border-radius: 16px;
+            }}
         """)
-        upload_layout = QVBoxLayout(upload_box)
-        upload_layout.setAlignment(Qt.AlignCenter)
-        upload_layout.setSpacing(15)
+        upload_container.setMinimumHeight(350)
         
+        upload_layout = QVBoxLayout(upload_container)
+        upload_layout.setAlignment(Qt.AlignCenter)
+        upload_layout.setSpacing(20)
+        upload_layout.setContentsMargins(40, 40, 40, 40)
+        
+        # Title
+        title_label = QLabel("📤 Upload CSV File")
+        title_label.setFont(QFont("Arial", 18, QFont.Bold))
+        title_label.setStyleSheet(f"color: {COLORS['primary']}; background: transparent;")
+        title_label.setAlignment(Qt.AlignCenter)
+        upload_layout.addWidget(title_label)
+        
+        # Icon
         icon_label = QLabel("📁")
-        icon_label.setFont(QFont("Arial", 48))
+        icon_label.setFont(QFont("Arial", 56))
         icon_label.setAlignment(Qt.AlignCenter)
+        icon_label.setStyleSheet("background: transparent;")
         upload_layout.addWidget(icon_label)
         
+        # File status label
         self.file_label = QLabel("No file selected")
         self.file_label.setAlignment(Qt.AlignCenter)
-        self.file_label.setStyleSheet(f"color: {COLORS['text_secondary']};")
+        self.file_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 14px; background: transparent;")
         upload_layout.addWidget(self.file_label)
         
-        btn_layout = QHBoxLayout()
+        # Buttons container
+        btn_container = QWidget()
+        btn_container.setStyleSheet("background: transparent;")
+        btn_layout = QHBoxLayout(btn_container)
         btn_layout.setAlignment(Qt.AlignCenter)
         btn_layout.setSpacing(20)
         
-        browse_btn = QPushButton("Browse Files")
-        browse_btn.setMinimumSize(160, 48)
+        browse_btn = QPushButton("📂 Browse Files")
+        browse_btn.setMinimumSize(180, 52)
+        browse_btn.setCursor(Qt.PointingHandCursor)
         browse_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['primary']};
                 color: white;
                 border: none;
-                border-radius: 8px;
+                border-radius: 10px;
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 15px;
+                padding: 12px 24px;
             }}
             QPushButton:hover {{
                 background-color: {COLORS['secondary']};
+            }}
+            QPushButton:pressed {{
+                background-color: #3730a3;
             }}
         """)
         browse_btn.clicked.connect(self.browse_file)
         btn_layout.addWidget(browse_btn)
         
-        self.upload_btn = QPushButton("Upload")
-        self.upload_btn.setMinimumSize(160, 48)
+        self.upload_btn = QPushButton("⬆️ Upload")
+        self.upload_btn.setMinimumSize(180, 52)
         self.upload_btn.setEnabled(False)
+        self.upload_btn.setCursor(Qt.PointingHandCursor)
         self.upload_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['success']};
                 color: white;
                 border: none;
-                border-radius: 8px;
+                border-radius: 10px;
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 15px;
+                padding: 12px 24px;
             }}
             QPushButton:hover {{
                 background-color: #059669;
             }}
+            QPushButton:pressed {{
+                background-color: #047857;
+            }}
             QPushButton:disabled {{
                 background-color: #d1d5db;
+                color: #9ca3af;
             }}
         """)
         self.upload_btn.clicked.connect(self.upload_file)
         btn_layout.addWidget(self.upload_btn)
         
-        upload_layout.addLayout(btn_layout)
+        upload_layout.addWidget(btn_container)
         
-        layout.addWidget(upload_box)
+        layout.addWidget(upload_container)
         
         # Instructions
         instructions = QLabel(

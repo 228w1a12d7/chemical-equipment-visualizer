@@ -499,12 +499,14 @@ def get_equipment_list(request, dataset_id):
         
         if start_date:
             from datetime import datetime
-            start = datetime.strptime(start_date, '%Y-%m-%d')
+            from django.utils import timezone
+            start = timezone.make_aware(datetime.strptime(start_date, '%Y-%m-%d'))
             equipment = equipment.filter(recorded_at__gte=start)
         
         if end_date:
             from datetime import datetime, timedelta
-            end = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+            from django.utils import timezone
+            end = timezone.make_aware(datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1))
             equipment = equipment.filter(recorded_at__lt=end)
         
         serializer = EquipmentSerializer(equipment, many=True)

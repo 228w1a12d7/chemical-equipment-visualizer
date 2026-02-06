@@ -535,19 +535,25 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(30, 30, 30, 30)
         
         # Upload area
-        upload_box = QGroupBox("Upload CSV File")
+        upload_box = QGroupBox("📤 Upload CSV File")
         upload_box.setStyleSheet("""
             QGroupBox {
                 font-weight: bold;
-                font-size: 14px;
-                border: 2px dashed #d1d5db;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 20px;
+                font-size: 16px;
+                color: #1e293b;
+                border: 2px dashed #4f46e5;
+                border-radius: 12px;
+                margin-top: 15px;
+                padding-top: 25px;
+                background-color: #f8fafc;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
                 left: 20px;
+                padding: 5px 15px;
+                background-color: white;
+                border-radius: 6px;
+                color: #4f46e5;
             }
         """)
         upload_layout = QVBoxLayout(upload_box)
@@ -637,9 +643,15 @@ class MainWindow(QMainWindow):
         stats_layout.setSpacing(20)
         
         self.stat_cards = {}
-        for stat in ["Equipment", "Avg Flow", "Avg Press", "Avg Temp"]:
-            card = self.create_stat_card(stat, "0")
-            self.stat_cards[stat] = card
+        stat_configs = [
+            ("Total Equipment", "🔧"),
+            ("Avg Flowrate", "💧"),
+            ("Avg Pressure", "📊"),
+            ("Avg Temperature", "🌡️")
+        ]
+        for stat_name, icon in stat_configs:
+            card = self.create_stat_card(f"{icon} {stat_name}", "0")
+            self.stat_cards[stat_name] = card
             stats_layout.addWidget(card)
         
         layout.addWidget(self.stats_widget)
@@ -726,20 +738,20 @@ class MainWindow(QMainWindow):
                 border: 1px solid #e2e8f0;
             }}
         """)
-        card.setMinimumHeight(110)
-        card.setMinimumWidth(160)
+        card.setMinimumHeight(120)
+        card.setMinimumWidth(180)
         
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(8)
+        layout.setContentsMargins(18, 15, 18, 15)
+        layout.setSpacing(10)
         
         title_label = QLabel(title)
-        title_label.setStyleSheet(f"color: {COLORS['text_secondary']}; font-size: 12px; font-weight: 500;")
+        title_label.setStyleSheet(f"color: {COLORS['text']}; font-size: 14px; font-weight: bold;")
         title_label.setWordWrap(True)
         layout.addWidget(title_label)
         
         value_label = QLabel(value)
-        value_label.setFont(QFont("Arial", 24, QFont.Bold))
+        value_label.setFont(QFont("Arial", 26, QFont.Bold))
         value_label.setStyleSheet(f"color: {COLORS['primary']};")
         value_label.setObjectName("value")
         layout.addWidget(value_label)
@@ -843,33 +855,63 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
         
-        header_layout = QHBoxLayout()
-        header = QLabel("Recent Uploads (Last 5)")
-        header.setFont(QFont("Arial", 14, QFont.Bold))
-        header_layout.addWidget(header)
+        # Header section with card styling
+        header_card = QFrame()
+        header_card.setStyleSheet(f"""
+            QFrame {{
+                background-color: {COLORS['card']};
+                border-radius: 12px;
+                border: 1px solid #e2e8f0;
+            }}
+        """)
+        header_card_layout = QHBoxLayout(header_card)
+        header_card_layout.setContentsMargins(20, 15, 20, 15)
+        
+        header = QLabel("📋 Recent Uploads (Last 5)")
+        header.setFont(QFont("Arial", 16, QFont.Bold))
+        header.setStyleSheet(f"color: {COLORS['text']};")
+        header_card_layout.addWidget(header)
+        
+        header_card_layout.addStretch()
         
         refresh_btn = QPushButton("🔄 Refresh")
+        refresh_btn.setMinimumSize(120, 40)
+        refresh_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {COLORS['primary']};
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+                font-size: 13px;
+                padding: 8px 16px;
+            }}
+            QPushButton:hover {{
+                background-color: {COLORS['secondary']};
+            }}
+        """)
         refresh_btn.clicked.connect(self.load_history)
-        header_layout.addWidget(refresh_btn)
-        header_layout.addStretch()
+        header_card_layout.addWidget(refresh_btn)
         
-        layout.addLayout(header_layout)
+        layout.addWidget(header_card)
         
+        # History list with more height
         self.history_list = QListWidget()
+        self.history_list.setMinimumHeight(300)
         self.history_list.setStyleSheet("""
             QListWidget {
                 background-color: white;
                 border: 1px solid #e2e8f0;
-                border-radius: 8px;
+                border-radius: 12px;
                 font-size: 14px;
                 color: #1e293b;
             }
             QListWidget::item {
-                padding: 18px;
+                padding: 20px;
                 border-bottom: 1px solid #e2e8f0;
                 color: #1e293b;
                 font-size: 14px;
-                min-height: 50px;
+                min-height: 60px;
             }
             QListWidget::item:selected {
                 background-color: #e0e7ff;
@@ -880,17 +922,49 @@ class MainWindow(QMainWindow):
             }
         """)
         self.history_list.itemDoubleClicked.connect(self.load_dataset_from_history)
-        layout.addWidget(self.history_list)
+        layout.addWidget(self.history_list, stretch=1)
+        
+        # Tips section to fill empty space
+        tips_card = QFrame()
+        tips_card.setStyleSheet(f"""
+            QFrame {{
+                background-color: #f0f9ff;
+                border-radius: 12px;
+                border: 1px solid #bae6fd;
+            }}
+        """)
+        tips_layout = QVBoxLayout(tips_card)
+        tips_layout.setContentsMargins(20, 15, 20, 15)
+        tips_layout.setSpacing(10)
+        
+        tips_header = QLabel("💡 Tips")
+        tips_header.setFont(QFont("Arial", 14, QFont.Bold))
+        tips_header.setStyleSheet("color: #0369a1;")
+        tips_layout.addWidget(tips_header)
+        
+        tips_text = QLabel(
+            "• Double-click on any dataset to load it\n"
+            "• Upload CSV files with equipment data\n"
+            "• View charts and statistics in the Data and Charts tabs\n"
+            "• Download PDF reports for selected datasets"
+        )
+        tips_text.setStyleSheet("color: #0c4a6e; font-size: 13px; line-height: 1.5;")
+        tips_layout.addWidget(tips_text)
+        
+        layout.addWidget(tips_card)
         
         # Delete button
         delete_btn = QPushButton("🗑️ Delete Selected")
+        delete_btn.setMinimumSize(160, 45)
         delete_btn.setStyleSheet(f"""
             QPushButton {{
                 background-color: {COLORS['danger']};
                 color: white;
                 border: none;
-                border-radius: 6px;
-                padding: 10px 20px;
+                border-radius: 8px;
+                padding: 12px 24px;
+                font-weight: bold;
+                font-size: 14px;
             }}
             QPushButton:hover {{
                 background-color: #dc2626;
@@ -945,16 +1019,16 @@ class MainWindow(QMainWindow):
         equipment_list = self.current_data.get("equipment_list", [])
         
         # Update stats
-        self.stat_cards["Equipment"].findChild(QLabel, "value").setText(
+        self.stat_cards["Total Equipment"].findChild(QLabel, "value").setText(
             str(summary.get("total_equipment", 0))
         )
-        self.stat_cards["Avg Flow"].findChild(QLabel, "value").setText(
+        self.stat_cards["Avg Flowrate"].findChild(QLabel, "value").setText(
             f"{summary.get('avg_flowrate', 0):.2f}"
         )
-        self.stat_cards["Avg Press"].findChild(QLabel, "value").setText(
+        self.stat_cards["Avg Pressure"].findChild(QLabel, "value").setText(
             f"{summary.get('avg_pressure', 0):.2f}"
         )
-        self.stat_cards["Avg Temp"].findChild(QLabel, "value").setText(
+        self.stat_cards["Avg Temperature"].findChild(QLabel, "value").setText(
             f"{summary.get('avg_temperature', 0):.2f}"
         )
         
@@ -962,24 +1036,24 @@ class MainWindow(QMainWindow):
         if equipment_list:
             columns = ["id", "name", "type", 
                       "flowrate", "pressure", "temperature"]
-            column_headers = ["No.", "ID", "Name", "Type", "Flowrate", "Pressure", "Temp."]
+            column_headers = ["#", "ID", "Equipment Name", "Type", "Flowrate", "Pressure", "Temperature"]
             self.data_table.setColumnCount(len(column_headers))
             self.data_table.setHorizontalHeaderLabels(column_headers)
             self.data_table.setRowCount(len(equipment_list))
             
-            # Set column widths
+            # Set column widths - make all columns properly visible
             self.data_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(0, 50)  # No. column
+            self.data_table.setColumnWidth(0, 45)  # # column
             self.data_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(1, 60)  # ID column
+            self.data_table.setColumnWidth(1, 70)  # ID column - wider for full ID
             self.data_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)  # Name
             self.data_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)  # Type
             self.data_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(4, 80)  # Flowrate
+            self.data_table.setColumnWidth(4, 90)  # Flowrate
             self.data_table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(5, 80)  # Pressure
+            self.data_table.setColumnWidth(5, 90)  # Pressure
             self.data_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Fixed)
-            self.data_table.setColumnWidth(6, 80)  # Temp
+            self.data_table.setColumnWidth(6, 100)  # Temperature - full word
             
             for row, item in enumerate(equipment_list):
                 # S.No. column

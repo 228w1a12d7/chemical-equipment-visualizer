@@ -992,16 +992,12 @@ class MainWindow(QMainWindow):
     def browse_file(self):
         """Open file dialog to select CSV file."""
         try:
-            # Use native dialog for better macOS compatibility
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog  # Try non-native dialog
-            
+            # Use native macOS dialog for best compatibility
             file_path, _ = QFileDialog.getOpenFileName(
                 self,
                 "Select CSV File",
                 os.path.expanduser("~"),  # Start from home directory
-                "CSV Files (*.csv);;All Files (*)",
-                options=options
+                "CSV Files (*.csv);;All Files (*)"
             )
             
             if file_path:

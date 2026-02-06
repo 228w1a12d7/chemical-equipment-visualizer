@@ -247,7 +247,7 @@ chemical-equipment-visualizer/
 
 ## 🚀 Deployment
 
-### Backend Deployed to Railway (Free)
+### Backend Deployed to Railway
 
 The backend is deployed on [Railway](https://railway.app):
 
@@ -260,7 +260,7 @@ The backend is deployed on [Railway](https://railway.app):
 5. The Dockerfile handles migrations and superuser creation automatically
 6. Live URL: https://chemical-equipment-api-production.up.railway.app
 
-### Frontend Deployed to Vercel (Free)
+### Frontend Deployed to Vercel
 
 The frontend is deployed on [Vercel](https://vercel.com):
 

@@ -91,3 +91,5 @@ coverage.xml
 *.bak
 *.tmp
 *.temp
+*.csv
+\!sample_equipment_data.csv

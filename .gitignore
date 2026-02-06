@@ -92,4 +92,7 @@ coverage.xml
 *.tmp
 *.temp
 *.csv
-\!sample_equipment_data.csv
+!sample_equipment_data.csv
+
+# Generated PDF reports
+*.pdf

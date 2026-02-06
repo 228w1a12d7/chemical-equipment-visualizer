@@ -16,6 +16,6 @@
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "https://your-backend-url.onrender.com/api"
+    "REACT_APP_API_URL": "https://chemical-equipment-api-production.up.railway.app/api"
   }
 }

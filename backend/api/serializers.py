@@ -41,7 +41,16 @@ class EquipmentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Equipment
-        fields = ['id', 'name', 'equipment_type', 'flowrate', 'pressure', 'temperature']
+        fields = ['id', 'name', 'equipment_type', 'flowrate', 'pressure', 'temperature', 'recorded_at']
+        read_only_fields = ['id', 'recorded_at']
+
+
+class EquipmentUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating Equipment."""
+    
+    class Meta:
+        model = Equipment
+        fields = ['name', 'equipment_type', 'flowrate', 'pressure', 'temperature']
 
 
 class DatasetUploadSerializer(serializers.ModelSerializer):

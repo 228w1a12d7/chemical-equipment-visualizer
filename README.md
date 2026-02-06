@@ -27,6 +27,7 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
 
 ## 📋 Features
 
+### Core Features
 - **CSV Upload**: Upload equipment data files with drag-and-drop support (Web) or file picker (Desktop)
 - **Data Summary API**: View total count, averages, and equipment type distribution
 - **Interactive Visualizations**: Charts using Chart.js (Web) and Matplotlib (Desktop)
@@ -34,11 +35,28 @@ A hybrid Web + Desktop application for visualizing and analyzing chemical equipm
   - Bar chart for average parameters by type
   - Line chart for equipment parameters overview
 - **History Management**: Store and access the last 5 uploaded datasets
-- **PDF Reports**: Generate downloadable PDF reports with summaries and data tables
 - **Authentication**: User registration and login with token-based authentication
-- **Logout Confirmation**: Modal dialog to confirm logout action
 - **Dual Frontend**: Both Web (React) and Desktop (PyQt5) interfaces
 - **Responsive Design**: Modern UI with smooth animations
+
+### Export Data
+- **PDF Reports**: Generate downloadable PDF reports with summaries and data tables
+- **CSV Export**: Download equipment data as CSV file for further analysis
+
+### Date Filtering
+- **Date Range Selection**: Filter equipment data by date range to see historical trends
+- **Real-time Filtering**: Apply date filters to view specific time periods
+
+### CRUD Operations
+- **Add Equipment**: Add new equipment records directly from the UI
+- **Edit Equipment**: Inline editing of equipment parameters (name, type, flowrate, pressure, temperature)
+- **Delete Equipment**: Remove individual equipment records with confirmation
+- **Auto-recalculation**: Statistics automatically update after any CRUD operation
+
+### Dark Mode
+- **Theme Toggle**: Switch between light and dark themes
+- **Persistent Preference**: Theme choice is saved to localStorage
+- **Full UI Support**: All components support both themes
 
 ---
 
@@ -168,6 +186,23 @@ HeatExchanger-001,Heat Exchanger,350.0,15.2,120.5
 | `/api/datasets/{id}/` | GET | Get specific dataset |
 | `/api/datasets/{id}/delete/` | DELETE | Delete a dataset |
 | `/api/datasets/{id}/pdf/` | GET | Download PDF report |
+| `/api/datasets/{id}/csv/` | GET | Export data as CSV |
+
+### Equipment CRUD Operations
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/datasets/{id}/equipment/` | GET | Get equipment list (with optional date filtering) |
+| `/api/datasets/{id}/equipment/add/` | POST | Add new equipment |
+| `/api/datasets/{id}/equipment/{eq_id}/` | GET | Get specific equipment |
+| `/api/datasets/{id}/equipment/{eq_id}/` | PUT | Update equipment |
+| `/api/datasets/{id}/equipment/{eq_id}/` | DELETE | Delete equipment |
+
+### Date Filtering Example
+
+```bash
+GET /api/datasets/1/equipment/?start_date=2024-01-01&end_date=2024-12-31
+```
 
 ### Example Response (Upload):
 ```json

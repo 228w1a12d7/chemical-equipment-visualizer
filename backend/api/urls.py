@@ -14,4 +14,10 @@ urlpatterns = [
     path('datasets/<int:dataset_id>/', views.get_dataset_summary, name='dataset_summary'),
     path('datasets/<int:dataset_id>/delete/', views.delete_dataset, name='delete_dataset'),
     path('datasets/<int:dataset_id>/pdf/', views.generate_pdf_report, name='generate_pdf'),
+    path('datasets/<int:dataset_id>/csv/', views.export_csv, name='export_csv'),
+    
+    # Equipment CRUD endpoints
+    path('datasets/<int:dataset_id>/equipment/', views.get_equipment_list, name='equipment_list'),
+    path('datasets/<int:dataset_id>/equipment/add/', views.add_equipment, name='add_equipment'),
+    path('datasets/<int:dataset_id>/equipment/<int:equipment_id>/', views.equipment_detail, name='equipment_detail'),
 ]

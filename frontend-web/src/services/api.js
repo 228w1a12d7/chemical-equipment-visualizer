@@ -59,6 +59,21 @@ export const dataAPI = {
   getDataset: (id) => api.get(`/datasets/${id}/`),
   deleteDataset: (id) => api.delete(`/datasets/${id}/delete/`),
   downloadPDF: (id) => api.get(`/datasets/${id}/pdf/`, { responseType: 'blob' }),
+  downloadCSV: (id) => api.get(`/datasets/${id}/csv/`, { responseType: 'blob' }),
+  
+  // Equipment CRUD operations
+  getEquipmentList: (datasetId, filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.startDate) params.append('start_date', filters.startDate);
+    if (filters.endDate) params.append('end_date', filters.endDate);
+    return api.get(`/datasets/${datasetId}/equipment/?${params.toString()}`);
+  },
+  addEquipment: (datasetId, equipmentData) => 
+    api.post(`/datasets/${datasetId}/equipment/add/`, equipmentData),
+  updateEquipment: (datasetId, equipmentId, equipmentData) => 
+    api.put(`/datasets/${datasetId}/equipment/${equipmentId}/`, equipmentData),
+  deleteEquipment: (datasetId, equipmentId) => 
+    api.delete(`/datasets/${datasetId}/equipment/${equipmentId}/`),
 };
 
 export default api;

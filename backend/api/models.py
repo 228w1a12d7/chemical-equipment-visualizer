@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 import json
 
 
@@ -56,9 +57,10 @@ class Equipment(models.Model):
     flowrate = models.FloatField(default=0.0)
     pressure = models.FloatField(default=0.0)
     temperature = models.FloatField(default=0.0)
+    recorded_at = models.DateTimeField(default=timezone.now)  # For date filtering
     
     class Meta:
-        ordering = ['name']
+        ordering = ['-recorded_at', 'name']
     
     def __str__(self):
         return f"{self.name} ({self.equipment_type})"

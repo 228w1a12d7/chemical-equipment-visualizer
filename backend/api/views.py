@@ -20,7 +20,7 @@ from .models import DatasetUpload, Equipment
 from .serializers import (
     UserSerializer, UserRegistrationSerializer,
     DatasetUploadSerializer, DatasetDetailSerializer,
-    EquipmentSerializer, SummarySerializer
+    EquipmentSerializer, EquipmentUpdateSerializer, SummarySerializer
 )
 
 
@@ -437,4 +437,200 @@ def generate_pdf_report(request, dataset_id):
         return Response(
             {'error': f'Error generating PDF: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_csv(request, dataset_id):
+    """Export dataset as CSV file."""
+    try:
+        dataset = DatasetUpload.objects.get(id=dataset_id, user=request.user)
+        
+        # Create CSV buffer
+        buffer = io.StringIO()
+        
+        # Get equipment data
+        equipment_list = dataset.equipment_list.all()
+        
+        # Create CSV with headers
+        df = pd.DataFrame([{
+            'Equipment Name': eq.name,
+            'Type': eq.equipment_type,
+            'Flowrate': eq.flowrate,
+            'Pressure': eq.pressure,
+            'Temperature': eq.temperature,
+            'Recorded At': eq.recorded_at.strftime('%Y-%m-%d %H:%M:%S') if eq.recorded_at else ''
+        } for eq in equipment_list])
+        
+        df.to_csv(buffer, index=False)
+        
+        # Create response
+        buffer.seek(0)
+        response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="equipment_data_{dataset_id}.csv"'
+        
+        return response
+        
+    except DatasetUpload.DoesNotExist:
+        return Response(
+            {'error': 'Dataset not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        return Response(
+            {'error': f'Error exporting CSV: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_equipment_list(request, dataset_id):
+    """Get equipment list with optional date filtering."""
+    try:
+        dataset = DatasetUpload.objects.get(id=dataset_id, user=request.user)
+        
+        equipment = dataset.equipment_list.all()
+        
+        # Date filtering
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if start_date:
+            from datetime import datetime
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            equipment = equipment.filter(recorded_at__gte=start)
+        
+        if end_date:
+            from datetime import datetime, timedelta
+            end = datetime.strptime(end_date, '%Y-%m-%d') + timedelta(days=1)
+            equipment = equipment.filter(recorded_at__lt=end)
+        
+        serializer = EquipmentSerializer(equipment, many=True)
+        
+        return Response({
+            'count': equipment.count(),
+            'equipment': serializer.data
+        })
+        
+    except DatasetUpload.DoesNotExist:
+        return Response(
+            {'error': 'Dataset not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def equipment_detail(request, dataset_id, equipment_id):
+    """Get, update, or delete a specific equipment item."""
+    try:
+        dataset = DatasetUpload.objects.get(id=dataset_id, user=request.user)
+        equipment = Equipment.objects.get(id=equipment_id, dataset=dataset)
+        
+        if request.method == 'GET':
+            serializer = EquipmentSerializer(equipment)
+            return Response(serializer.data)
+        
+        elif request.method == 'PUT':
+            serializer = EquipmentUpdateSerializer(equipment, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                
+                # Recalculate dataset averages
+                all_equipment = dataset.equipment_list.all()
+                dataset.avg_flowrate = round(sum(eq.flowrate for eq in all_equipment) / len(all_equipment), 2)
+                dataset.avg_pressure = round(sum(eq.pressure for eq in all_equipment) / len(all_equipment), 2)
+                dataset.avg_temperature = round(sum(eq.temperature for eq in all_equipment) / len(all_equipment), 2)
+                
+                # Recalculate type distribution
+                type_dist = {}
+                for eq in all_equipment:
+                    type_dist[eq.equipment_type] = type_dist.get(eq.equipment_type, 0) + 1
+                dataset.set_type_distribution(type_dist)
+                dataset.save()
+                
+                return Response({
+                    'message': 'Equipment updated successfully',
+                    'equipment': EquipmentSerializer(equipment).data
+                })
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        elif request.method == 'DELETE':
+            equipment.delete()
+            
+            # Recalculate dataset statistics
+            all_equipment = dataset.equipment_list.all()
+            if all_equipment.exists():
+                dataset.total_equipment = all_equipment.count()
+                dataset.avg_flowrate = round(sum(eq.flowrate for eq in all_equipment) / len(all_equipment), 2)
+                dataset.avg_pressure = round(sum(eq.pressure for eq in all_equipment) / len(all_equipment), 2)
+                dataset.avg_temperature = round(sum(eq.temperature for eq in all_equipment) / len(all_equipment), 2)
+                
+                type_dist = {}
+                for eq in all_equipment:
+                    type_dist[eq.equipment_type] = type_dist.get(eq.equipment_type, 0) + 1
+                dataset.set_type_distribution(type_dist)
+            else:
+                dataset.total_equipment = 0
+                dataset.avg_flowrate = 0
+                dataset.avg_pressure = 0
+                dataset.avg_temperature = 0
+                dataset.set_type_distribution({})
+            
+            dataset.save()
+            
+            return Response({'message': 'Equipment deleted successfully'})
+        
+    except DatasetUpload.DoesNotExist:
+        return Response(
+            {'error': 'Dataset not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    except Equipment.DoesNotExist:
+        return Response(
+            {'error': 'Equipment not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_equipment(request, dataset_id):
+    """Add a new equipment item to a dataset."""
+    try:
+        dataset = DatasetUpload.objects.get(id=dataset_id, user=request.user)
+        
+        serializer = EquipmentUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            equipment = Equipment.objects.create(
+                dataset=dataset,
+                **serializer.validated_data
+            )
+            
+            # Recalculate dataset statistics
+            all_equipment = dataset.equipment_list.all()
+            dataset.total_equipment = all_equipment.count()
+            dataset.avg_flowrate = round(sum(eq.flowrate for eq in all_equipment) / len(all_equipment), 2)
+            dataset.avg_pressure = round(sum(eq.pressure for eq in all_equipment) / len(all_equipment), 2)
+            dataset.avg_temperature = round(sum(eq.temperature for eq in all_equipment) / len(all_equipment), 2)
+            
+            type_dist = {}
+            for eq in all_equipment:
+                type_dist[eq.equipment_type] = type_dist.get(eq.equipment_type, 0) + 1
+            dataset.set_type_distribution(type_dist)
+            dataset.save()
+            
+            return Response({
+                'message': 'Equipment added successfully',
+                'equipment': EquipmentSerializer(equipment).data
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    except DatasetUpload.DoesNotExist:
+        return Response(
+            {'error': 'Dataset not found'},
+            status=status.HTTP_404_NOT_FOUND
         )

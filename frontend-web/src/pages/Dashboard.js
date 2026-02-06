@@ -21,6 +21,31 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('darkMode') === 'true';
+  });
+  
+  // Date filtering state
+  const [dateFilter, setDateFilter] = useState({
+    startDate: '',
+    endDate: '',
+  });
+  
+  // Add equipment modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newEquipment, setNewEquipment] = useState({
+    name: '',
+    equipment_type: '',
+    flowrate: 0,
+    pressure: 0,
+    temperature: 0,
+  });
+
+  // Apply dark mode class to body
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -34,6 +59,21 @@ const Dashboard = () => {
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
+
+  const refreshDataset = async () => {
+    if (!selectedDataset) return;
+    try {
+      const response = await dataAPI.getDataset(selectedDataset);
+      setCurrentData({
+        summary: response.data.summary,
+        equipment_list: response.data.equipment_list,
+        dataset_id: selectedDataset,
+        filename: response.data.filename,
+      });
+    } catch (error) {
+      toast.error('Failed to refresh dataset');
+    }
+  };
 
   const handleUploadSuccess = (data) => {
     setCurrentData({
@@ -111,6 +151,96 @@ const Dashboard = () => {
     }
   };
 
+  const handleDownloadCSV = async () => {
+    if (!selectedDataset) {
+      toast.error('Please select a dataset first');
+      return;
+    }
+
+    try {
+      const response = await dataAPI.downloadCSV(selectedDataset);
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `equipment_data_${selectedDataset}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success('CSV downloaded successfully!');
+    } catch (error) {
+      toast.error('Failed to export CSV');
+    }
+  };
+
+  // CRUD Operations
+  const handleEditEquipment = async (equipmentId, updatedData) => {
+    try {
+      await dataAPI.updateEquipment(selectedDataset, equipmentId, updatedData);
+      toast.success('Equipment updated successfully');
+      await refreshDataset();
+    } catch (error) {
+      toast.error('Failed to update equipment');
+    }
+  };
+
+  const handleDeleteEquipment = async (equipmentId) => {
+    if (!window.confirm('Are you sure you want to delete this equipment?')) {
+      return;
+    }
+    
+    try {
+      await dataAPI.deleteEquipment(selectedDataset, equipmentId);
+      toast.success('Equipment deleted successfully');
+      await refreshDataset();
+    } catch (error) {
+      toast.error('Failed to delete equipment');
+    }
+  };
+
+  const handleAddEquipment = async () => {
+    try {
+      await dataAPI.addEquipment(selectedDataset, newEquipment);
+      toast.success('Equipment added successfully');
+      setShowAddModal(false);
+      setNewEquipment({
+        name: '',
+        equipment_type: '',
+        flowrate: 0,
+        pressure: 0,
+        temperature: 0,
+      });
+      await refreshDataset();
+    } catch (error) {
+      toast.error('Failed to add equipment');
+    }
+  };
+
+  // Date filtering
+  const handleApplyDateFilter = async () => {
+    if (!selectedDataset) return;
+    
+    setLoading(true);
+    try {
+      const response = await dataAPI.getEquipmentList(selectedDataset, dateFilter);
+      setCurrentData(prev => ({
+        ...prev,
+        equipment_list: response.data.equipment,
+      }));
+      toast.success(`Filtered: ${response.data.count} equipment found`);
+    } catch (error) {
+      toast.error('Failed to apply filter');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearDateFilter = async () => {
+    setDateFilter({ startDate: '', endDate: '' });
+    await refreshDataset();
+  };
+
   const handleLogout = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -134,8 +264,12 @@ const Dashboard = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode(prev => !prev);
+  };
+
   return (
-    <div className="dashboard">
+    <div className={`dashboard ${darkMode ? 'dark-mode' : ''}`}>
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-brand">
@@ -185,7 +319,13 @@ const Dashboard = () => {
                 <span>History</span>
               </a>
             </li>
-            <li style={{ marginTop: '30px' }}>
+            <li style={{ marginTop: '20px' }}>
+              <button type="button" onClick={toggleDarkMode} className="theme-toggle">
+                <span>{darkMode ? '☀️' : '🌙'}</span>
+                <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            </li>
+            <li style={{ marginTop: '10px' }}>
               <button type="button" onClick={handleLogout}>
                 <span>🚪</span>
                 <span>Logout</span>
@@ -249,21 +389,73 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {/* Actions */}
+                {/* Export & Filter Actions */}
                 <div className="card" style={{ marginBottom: '25px' }}>
+                  <div className="card-header">
+                    <h3>Export Data</h3>
+                  </div>
                   <div className="action-buttons">
                     <button className="btn btn-success btn-icon" onClick={handleDownloadPDF}>
                       📄 Download PDF Report
                     </button>
+                    <button className="btn btn-primary btn-icon" onClick={handleDownloadCSV}>
+                      📥 Export as CSV
+                    </button>
                   </div>
                 </div>
 
-                {/* Data Table */}
+                {/* Date Filter */}
+                <div className="card" style={{ marginBottom: '25px' }}>
+                  <div className="card-header">
+                    <h3>Filter by Date</h3>
+                  </div>
+                  <div className="date-filter">
+                    <div className="filter-inputs">
+                      <div className="filter-group">
+                        <label>Start Date</label>
+                        <input 
+                          type="date" 
+                          value={dateFilter.startDate}
+                          onChange={(e) => setDateFilter(prev => ({ ...prev, startDate: e.target.value }))}
+                        />
+                      </div>
+                      <div className="filter-group">
+                        <label>End Date</label>
+                        <input 
+                          type="date" 
+                          value={dateFilter.endDate}
+                          onChange={(e) => setDateFilter(prev => ({ ...prev, endDate: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="filter-actions">
+                      <button className="btn btn-primary btn-sm" onClick={handleApplyDateFilter}>
+                        Apply Filter
+                      </button>
+                      <button className="btn btn-secondary btn-sm" onClick={handleClearDateFilter}>
+                        Clear Filter
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Data Table with CRUD */}
                 <div className="card">
                   <div className="card-header">
                     <h3>Equipment List</h3>
+                    <button 
+                      className="btn btn-success btn-sm"
+                      onClick={() => setShowAddModal(true)}
+                    >
+                      + Add Equipment
+                    </button>
                   </div>
-                  <DataTable data={currentData.equipment_list} />
+                  <DataTable 
+                    data={currentData.equipment_list} 
+                    editable={true}
+                    onEdit={handleEditEquipment}
+                    onDelete={handleDeleteEquipment}
+                  />
                 </div>
               </>
             ) : (
@@ -365,6 +557,73 @@ const Dashboard = () => {
               </button>
               <button className="btn-confirm" onClick={confirmLogout}>
                 Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Equipment Modal */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="modal-content modal-form">
+            <div className="modal-icon">➕</div>
+            <h3>Add New Equipment</h3>
+            <div className="modal-form-fields">
+              <div className="form-group">
+                <label>Equipment Name</label>
+                <input 
+                  type="text" 
+                  value={newEquipment.name}
+                  onChange={(e) => setNewEquipment(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Reactor-006"
+                />
+              </div>
+              <div className="form-group">
+                <label>Type</label>
+                <input 
+                  type="text" 
+                  value={newEquipment.equipment_type}
+                  onChange={(e) => setNewEquipment(prev => ({ ...prev, equipment_type: e.target.value }))}
+                  placeholder="e.g., Reactor"
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Flowrate</label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    value={newEquipment.flowrate}
+                    onChange={(e) => setNewEquipment(prev => ({ ...prev, flowrate: parseFloat(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Pressure</label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    value={newEquipment.pressure}
+                    onChange={(e) => setNewEquipment(prev => ({ ...prev, pressure: parseFloat(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Temperature</label>
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    value={newEquipment.temperature}
+                    onChange={(e) => setNewEquipment(prev => ({ ...prev, temperature: parseFloat(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-cancel" onClick={() => setShowAddModal(false)}>
+                Cancel
+              </button>
+              <button className="btn-confirm btn-add" onClick={handleAddEquipment}>
+                Add Equipment
               </button>
             </div>
           </div>

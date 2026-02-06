@@ -670,3 +670,369 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
+
+/* Date Filter Styles */
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-inputs {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+.filter-group input[type="date"] {
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.3s;
+}
+
+.filter-group input[type="date"]:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Edit Table Styles */
+.action-cell {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-table {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #f0f4ff;
+}
+
+.btn-edit:hover {
+  background: #667eea;
+  color: white;
+}
+
+.btn-delete {
+  background: #fff0f0;
+}
+
+.btn-delete:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-save {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.btn-save:hover {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn-cancel-edit {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.btn-cancel-edit:hover {
+  background: #ef6c00;
+  color: white;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+}
+
+.edit-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Add Equipment Modal */
+.modal-form {
+  max-width: 480px;
+}
+
+.modal-form-fields {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.modal-form-fields .form-group {
+  margin-bottom: 16px;
+}
+
+.modal-form-fields .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.modal-form-fields .form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.modal-form-fields .form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #27ae60 0%, #219a52 100%) !important;
+}
+
+.btn-add:hover {
+  box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4) !important;
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ==================== DARK MODE ==================== */
+body.dark-mode {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.dark-mode .main-content {
+  background: #0f0f23;
+}
+
+.dark-mode .header h2 {
+  color: #e0e0e0;
+}
+
+.dark-mode .user-info {
+  background: #1e1e3f;
+  color: #e0e0e0;
+}
+
+.dark-mode .card {
+  background: #1e1e3f;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .card-header h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .stat-card {
+  background: #1e1e3f;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .stat-card h4 {
+  color: #a0a0a0;
+}
+
+.dark-mode .stat-card .value {
+  color: #e0e0e0;
+}
+
+.dark-mode .stat-card.highlight {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.dark-mode .chart-container {
+  background: #1e1e3f;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .chart-container h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .data-table th {
+  background: #252550;
+  color: #e0e0e0;
+}
+
+.dark-mode .data-table td {
+  border-bottom-color: #2a2a4a;
+  color: #d0d0d0;
+}
+
+.dark-mode .data-table tr:hover {
+  background: #252550;
+}
+
+.dark-mode .history-item {
+  background: #252550;
+  color: #e0e0e0;
+}
+
+.dark-mode .history-item:hover {
+  background: #2a2a5a;
+}
+
+.dark-mode .history-item.active {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.dark-mode .history-date {
+  color: #a0a0a0;
+}
+
+.dark-mode .history-stats {
+  color: #b0b0b0;
+}
+
+.dark-mode .upload-area {
+  background: #1a1a3a;
+  border-color: #3a3a5a;
+}
+
+.dark-mode .upload-area:hover {
+  background: #202050;
+  border-color: #5a67d8;
+}
+
+.dark-mode .upload-area h4 {
+  color: #e0e0e0;
+}
+
+.dark-mode .upload-area p {
+  color: #a0a0a0;
+}
+
+.dark-mode .empty-state {
+  color: #a0a0a0;
+}
+
+.dark-mode .empty-state h3 {
+  color: #d0d0d0;
+}
+
+.dark-mode .modal-content {
+  background: #1e1e3f;
+}
+
+.dark-mode .modal-content h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .modal-content p {
+  color: #a0a0a0;
+}
+
+.dark-mode .modal-buttons .btn-cancel {
+  background: #252550;
+  border-color: #3a3a5a;
+  color: #d0d0d0;
+}
+
+.dark-mode .modal-buttons .btn-cancel:hover {
+  background: #2a2a5a;
+}
+
+.dark-mode .filter-group label {
+  color: #a0a0a0;
+}
+
+.dark-mode .filter-group input[type="date"] {
+  background: #252550;
+  border-color: #3a3a5a;
+  color: #e0e0e0;
+}
+
+.dark-mode .filter-group input[type="date"]:focus {
+  border-color: #5a67d8;
+}
+
+.dark-mode .edit-input {
+  background: #252550;
+  border-color: #5a67d8;
+  color: #e0e0e0;
+}
+
+.dark-mode .modal-form-fields .form-group label {
+  color: #a0a0a0;
+}
+
+.dark-mode .modal-form-fields .form-group input {
+  background: #252550;
+  border-color: #3a3a5a;
+  color: #e0e0e0;
+}
+
+.dark-mode .modal-form-fields .form-group input:focus {
+  border-color: #5a67d8;
+}
+
+.dark-mode .btn-edit {
+  background: #252550;
+}
+
+.dark-mode .btn-delete {
+  background: #3a2530;
+}
+
+.dark-mode .btn-save {
+  background: #1e3a2f;
+  color: #4ade80;
+}
+
+.dark-mode .btn-cancel-edit {
+  background: #3a3020;
+  color: #fbbf24;
+}
+
+.dark-mode .sidebar {
+  background: linear-gradient(180deg, #0f1629 0%, #0a0f1f 100%);
+}

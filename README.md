@@ -304,16 +304,6 @@ vercel --prod
 - `REACT_APP_API_URL` = `https://chemical-equipment-api-production.up.railway.app/api`
 
 ---
-
-## 🎬 Demo Video
-
-Watch a complete walkthrough of the application:
-
-[![Demo Video]([https://drive.google.com/file/d/1yGJbqlTST2of4DFRj0fGonsP_FcFxAQ0/view?usp=drive_link)]
-
-> **Note:** The demo video showcases user registration, login, CSV upload, data visualization, PDF generation, and logout functionality.
-
----
 ## 👨‍💻 Author
 
 **Kundana Sree Bavisetti**
